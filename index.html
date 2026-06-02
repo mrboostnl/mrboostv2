@@ -71,7 +71,8 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { background: var(--bg); color: var(--text); font-family: var(--body); font-weight: 500; -webkit-font-smoothing: antialiased; letter-spacing: -0.005em; }
-body { position: relative; }
+html { overflow-x: clip; }
+body { position: relative; overflow-x: clip; max-width: 100%; }
 /* Solid background — grain removed per request. */
 /* Keep grain above the dark bg but below interactive things */
 body > * { position: relative; z-index: 2; }
