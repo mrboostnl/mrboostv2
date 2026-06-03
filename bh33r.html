@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Boost CRM</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family:'Gotham Ultra'; src:url('assets/GothamUltra.otf') format('opentype'); font-weight:900; font-style:normal; font-display:swap; }
+  @font-face { font-family:'Helvetica Neue'; src:local('Helvetica Neue'),local('HelveticaNeue'),local('Helvetica'),local('Arial'); font-weight:400; }
+  @font-face { font-family:'Helvetica Neue'; src:local('Helvetica Neue Medium'),local('HelveticaNeue-Medium'),local('Helvetica'),local('Arial'); font-weight:500; }
+  @font-face { font-family:'Helvetica Neue'; src:local('Helvetica Neue Bold'),local('HelveticaNeue-Bold'),local('Helvetica-Bold'),local('Arial'); font-weight:700; }
+</style>
+<style>
+:root{
+  --bg:#0a0a0a; --bg-2:#0e0e0d; --panel:#121211; --panel-2:#161615;
+  --text:#f2f2f2; --text-dim:#8a8a8a; --cream:#e9e8e3; --cream-2:#d9d8d2; --yellow:#F8FF88;
+  --line:rgba(255,255,255,0.09); --line-2:rgba(255,255,255,0.14);
+  --display:'Helvetica Neue',Helvetica,Arial,sans-serif;
+  --ultra:'Gotham Ultra','Anton','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --ease:cubic-bezier(0.625,0.05,0,1); --ease-out:cubic-bezier(0.16,1,0.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--bg);color:var(--text);font-family:var(--display);font-weight:500;-webkit-font-smoothing:antialiased;letter-spacing:-0.005em;min-height:100%;}
+body{min-height:100vh;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+img,svg{display:block;max-width:100%;}
+::selection{background:var(--cream);color:#0a0a0a;}
+
+/* ============ LOGIN ============ */
+.login{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+.login__card{ width:100%; max-width:380px; text-align:center; }
+.login__logo{ height:40px; width:auto; margin:0 auto 40px; }
+.login__eyebrow{ display:inline-flex; align-items:center; gap:9px; font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); margin-bottom:16px; }
+.login__eyebrow .dot{ width:6px;height:6px;border-radius:50%;background:var(--yellow); }
+.login__title{ font-family:var(--ultra); font-weight:900; font-size:34px; line-height:1; letter-spacing:-.02em; text-transform:uppercase; color:var(--cream); }
+.login__sub{ margin-top:14px; font-size:14px; color:var(--text-dim); }
+.login__form{ margin-top:30px; }
+.login__input{
+  -webkit-appearance:none; appearance:none; width:100%; text-align:center;
+  padding:18px 20px; border-radius:12px; border:1px solid var(--line-2);
+  background:rgba(255,255,255,.02); color:var(--cream);
+  font-family:var(--ultra); font-size:22px; letter-spacing:.32em; font-weight:900;
+  transition:border-color .2s, background .2s;
+}
+.login__input::placeholder{ font-family:var(--display); font-weight:500; letter-spacing:.04em; font-size:15px; color:rgba(255,255,255,.35); }
+.login__input:focus{ outline:none; border-color:var(--cream); background:rgba(255,255,255,.035); }
+.login.shake .login__input{ animation:shake .42s var(--ease); border-color:#ff5c34; }
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.login__btn{
+  width:100%; margin-top:12px; padding:18px; border-radius:12px;
+  background:var(--cream); color:#0a0a0a; font-size:14px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  transition:transform .2s var(--ease-out), background .2s;
+}
+.login__btn:hover{ transform:translateY(-2px); background:#fff; }
+.login__btn svg{ width:16px;height:16px; }
+.login__err{ margin-top:14px; font-size:13px; color:#ff7a57; min-height:1em; opacity:0; transition:opacity .2s; }
+.login__err.show{ opacity:1; }
+.login__hint{ margin-top:26px; font-size:12px; color:rgba(255,255,255,.32); line-height:1.5; }
+
+/* ============ APP ============ */
+.app{ display:none; min-height:100vh; flex-direction:column; }
+.app.show{ display:flex; }
+
+.topbar{ position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:18px; padding:18px 28px; background:rgba(10,10,10,.86); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); }
+.topbar__brand{ display:flex; align-items:center; gap:14px; }
+.topbar__logo{ height:30px; width:auto; }
+.topbar__name{ font-family:var(--ultra); font-size:13px; letter-spacing:.04em; text-transform:uppercase; color:var(--cream); padding-left:14px; border-left:1px solid var(--line-2); }
+.topbar__spacer{ flex:1; }
+.topbar__btn{ display:inline-flex; align-items:center; gap:9px; font-size:13px; font-weight:600; letter-spacing:.02em; color:var(--cream); padding:10px 16px; border-radius:999px; border:1px solid var(--line-2); transition:border-color .2s, background .2s, color .2s; }
+.topbar__btn:hover{ border-color:var(--cream); }
+.topbar__btn svg{ width:15px;height:15px; }
+.topbar__btn--ghost{ border-color:transparent; color:var(--text-dim); }
+.topbar__btn--ghost:hover{ color:var(--cream); border-color:transparent; }
+.conn{ display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:600; letter-spacing:.03em; color:var(--text-dim); padding:8px 14px; border-radius:999px; border:1px solid var(--line); }
+.conn__d{ width:7px;height:7px;border-radius:50%; background:var(--text-dim); }
+.conn.is-live{ color:#74e0a0; border-color:rgba(116,224,160,.3); }
+.conn.is-live .conn__d{ background:#74e0a0; }
+
+.wrap{ width:100%; max-width:1320px; margin:0 auto; padding:28px; flex:1; }
+
+/* stats */
+.stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:26px; }
+.stat{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:22px 22px; }
+.stat__label{ font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--text-dim); }
+.stat__value{ margin-top:12px; font-family:var(--ultra); font-size:42px; line-height:1; letter-spacing:-.02em; color:var(--cream); }
+.stat__value .u{ font-size:18px; color:var(--text-dim); margin-left:2px; }
+
+/* main split */
+.board{ display:grid; grid-template-columns:minmax(320px,420px) 1fr; gap:18px; align-items:start; }
+.list-col{ background:var(--panel); border:1px solid var(--line); border-radius:18px; overflow:hidden; }
+.list-head{ display:flex; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid var(--line); }
+.search{ position:relative; flex:1; }
+.search svg{ position:absolute; left:14px; top:50%; transform:translateY(-50%); width:16px;height:16px; color:var(--text-dim); }
+.search input{ -webkit-appearance:none; appearance:none; width:100%; padding:11px 14px 11px 40px; border-radius:999px; border:1px solid var(--line-2); background:rgba(255,255,255,.02); color:var(--text); font-family:inherit; font-size:14px; }
+.search input::placeholder{ color:rgba(255,255,255,.38); }
+.search input:focus{ outline:none; border-color:var(--cream); }
+
+.list{ max-height:calc(100vh - 320px); overflow-y:auto; }
+.lead{ display:flex; align-items:center; gap:14px; padding:16px 18px; border-bottom:1px solid var(--line); cursor:pointer; transition:background .18s; }
+.lead:last-child{ border-bottom:none; }
+.lead:hover{ background:var(--panel-2); }
+.lead.is-active{ background:var(--panel-2); box-shadow:inset 3px 0 0 var(--cream); }
+.lead__avatar{ flex:none; width:40px; height:40px; border-radius:50%; display:grid; place-items:center; font-family:var(--ultra); font-size:14px; color:var(--cream); background:rgba(255,255,255,.06); border:1px solid var(--line-2); }
+.lead__main{ flex:1; min-width:0; }
+.lead__name{ font-size:15px; font-weight:600; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lead__company{ font-size:13px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+.lead__meta{ flex:none; text-align:right; }
+.lead__time{ font-size:12px; color:var(--text-dim); }
+.lead__status{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; }
+.lead__status .d{ width:7px;height:7px;border-radius:50%; }
+.st-new{ color:var(--yellow); } .st-new .d{ background:var(--yellow); }
+.st-called{ color:#7cc6ff; } .st-called .d{ background:#7cc6ff; }
+.st-won{ color:#74e0a0; } .st-won .d{ background:#74e0a0; }
+
+/* detail */
+.detail{ background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:0; min-height:420px; overflow:hidden; }
+.detail__empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height:420px; padding:40px; color:var(--text-dim); }
+.detail__empty svg{ width:42px;height:42px; color:rgba(255,255,255,.2); margin-bottom:18px; }
+.detail__empty p{ font-size:15px; }
+.detail__head{ padding:26px 28px; border-bottom:1px solid var(--line); display:flex; align-items:flex-start; gap:18px; }
+.detail__avatar{ flex:none; width:56px;height:56px; border-radius:50%; display:grid; place-items:center; font-family:var(--ultra); font-size:20px; color:#0a0a0a; background:var(--cream); }
+.detail__id{ flex:1; }
+.detail__name{ font-family:var(--ultra); font-size:26px; line-height:1.05; letter-spacing:-.01em; text-transform:uppercase; color:var(--cream); }
+.detail__company{ margin-top:6px; font-size:15px; color:var(--text-dim); }
+.detail__when{ margin-top:4px; font-size:13px; color:rgba(255,255,255,.4); }
+.detail__del{ flex:none; width:38px;height:38px; border-radius:10px; border:1px solid var(--line-2); display:grid; place-items:center; color:var(--text-dim); transition:all .2s; }
+.detail__del:hover{ color:#ff7a57; border-color:rgba(255,92,52,.5); }
+.detail__del svg{ width:16px;height:16px; }
+
+.detail__body{ padding:26px 28px; }
+.contact-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:26px; }
+.contact{ display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px; border:1px solid var(--line); background:var(--bg-2); transition:border-color .2s; }
+.contact:hover{ border-color:var(--line-2); }
+.contact__ic{ flex:none; width:34px;height:34px; border-radius:9px; display:grid; place-items:center; background:rgba(255,255,255,.05); color:var(--cream); }
+.contact__ic svg{ width:16px;height:16px; }
+.contact__t{ min-width:0; }
+.contact__l{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-dim); }
+.contact__v{ font-size:14px; color:var(--cream); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.status-pills{ display:flex; gap:9px; margin-bottom:28px; }
+.status-pill{ flex:1; padding:12px; border-radius:10px; border:1px solid var(--line-2); font-size:12px; font-weight:700; letter-spacing:.03em; text-transform:uppercase; color:var(--text-dim); transition:all .2s; }
+.status-pill:hover{ border-color:var(--cream); color:var(--cream); }
+.status-pill.on-new{ background:var(--yellow); border-color:var(--yellow); color:#0a0a0a; }
+.status-pill.on-called{ background:#7cc6ff; border-color:#7cc6ff; color:#0a0a0a; }
+.status-pill.on-won{ background:#74e0a0; border-color:#74e0a0; color:#0a0a0a; }
+
+.ans{ margin-bottom:22px; }
+.ans__label{ font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--text-dim); margin-bottom:12px; }
+.ans__chips{ display:flex; flex-wrap:wrap; gap:8px; }
+.chip{ padding:9px 15px; border-radius:999px; border:1px solid var(--line-2); font-size:13px; color:var(--cream); background:rgba(255,255,255,.02); }
+.chip--value{ background:var(--cream); color:#0a0a0a; border-color:var(--cream); font-family:var(--ultra); font-size:14px; letter-spacing:.01em; padding:10px 18px; }
+.ans__none{ font-size:13px; color:rgba(255,255,255,.3); }
+
+/* empty board */
+.empty{ text-align:center; padding:80px 24px; }
+.empty__ic{ width:64px;height:64px;border-radius:50%; margin:0 auto 24px; display:grid; place-items:center; border:1px solid var(--line-2); color:var(--text-dim); }
+.empty__ic svg{ width:28px;height:28px; }
+.empty__title{ font-family:var(--ultra); font-size:26px; text-transform:uppercase; letter-spacing:-.01em; color:var(--cream); }
+.empty__sub{ margin:14px auto 0; max-width:420px; font-size:15px; line-height:1.55; color:var(--text-dim); }
+.empty__btn{ margin-top:26px; display:inline-flex; align-items:center; gap:10px; padding:14px 26px; border-radius:999px; border:1px solid var(--line-2); color:var(--cream); font-size:13px; font-weight:600; letter-spacing:.03em; transition:border-color .2s, background .2s; }
+.empty__btn:hover{ border-color:var(--cream); }
+
+.toast{ position:fixed; left:50%; bottom:28px; transform:translate(-50%,20px); z-index:60; padding:13px 22px; border-radius:999px; background:var(--cream); color:#0a0a0a; font-size:13px; font-weight:600; opacity:0; pointer-events:none; transition:opacity .25s, transform .25s var(--ease-out); }
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+
+@media (max-width:920px){
+  .stats{ grid-template-columns:repeat(2,1fr); }
+  .board{ grid-template-columns:1fr; }
+  .list{ max-height:none; }
+  .detail{ display:none; }
+  .detail.is-open{ display:block; position:fixed; inset:0; z-index:40; border-radius:0; min-height:100vh; overflow-y:auto; }
+  .detail__back{ display:flex; }
+}
+.detail__back{ display:none; align-items:center; gap:10px; padding:16px 22px; border-bottom:1px solid var(--line); font-size:14px; color:var(--cream); }
+.detail__back svg{ width:18px;height:18px; }
+@media (max-width:560px){
+  .topbar{ padding:14px 16px; gap:10px; }
+  .topbar__name{ display:none; }
+  .topbar__btn span{ display:none; }
+  .topbar__btn{ padding:10px; }
+  .wrap{ padding:18px 16px; }
+  .contact-row{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div class="login" id="login">
+  <div class="login__card">
+    <img class="login__logo" src="data:image/svg+xml;utf8,%3Csvg%20id%3D%22Group_48868%22%20data-name%3D%22Group%2048868%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22347.402%22%20height%3D%22165.429%22%20viewBox%3D%220%200%20347.402%20165.429%22%3E%0A%20%20%3Cpath%20id%3D%22Path_874%22%20data-name%3D%22Path%20874%22%20d%3D%22M762.1%2C275.1%22%20transform%3D%22translate(-582.166%20-210.346)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_859%22%20data-name%3D%22Path%20859%22%20d%3D%22M55.692%2C387.9a21.765%2C21.765%2C0%2C0%2C0-8.093-2.035%2C50.929%2C50.929%2C0%2C0%2C0-12.631.912L6.081%2C391.857%2C0%2C459.923l35.226-6.175a58.414%2C58.414%2C0%2C0%2C0%2C14.128-4.07%2C28.536%2C28.536%2C0%2C0%2C0%2C8.842-5.895%2C16.577%2C16.577%2C0%2C0%2C0%2C4.234-7.111%2C17.8%2C17.8%2C0%2C0%2C0%2C.351-7.859%2C11.817%2C11.817%2C0%2C0%2C0-4.234-7.508%2C14.9%2C14.9%2C0%2C0%2C0-8.163-3.088l-2.9-.234%2C2.643-1.193c4.748-2.152%2C8.163-4.982%2C10.151-8.444a15.962%2C15.962%2C0%2C0%2C0%2C1.988-10.97%2C15.335%2C15.335%2C0%2C0%2C0-2.058-5.427A10.819%2C10.819%2C0%2C0%2C0%2C55.692%2C387.9ZM39.787%2C435.363a11.878%2C11.878%2C0%2C0%2C1-6.479%2C2.947l-11.7%2C2.058%2C1.076-11.906%2C10.175-1.778c5.216-.912%2C8.163.281%2C8.725%2C3.555A5.686%2C5.686%2C0%2C0%2C1%2C39.787%2C435.363Zm1.707-24.607c-1.263%2C1.45-3.368%2C2.433-6.432%2C2.97l-11.227%2C1.965.982-11.3%2C9.8-1.73a11.892%2C11.892%2C0%2C0%2C1%2C5.754.023%2C4.033%2C4.033%2C0%2C0%2C1%2C2.643%2C3.3A5.623%2C5.623%2C0%2C0%2C1%2C41.494%2C410.757Z%22%20transform%3D%22translate(0%20-294.494)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_866%22%20data-name%3D%22Path%20866%22%20d%3D%22M352.019%2C337.119a31.707%2C31.707%2C0%2C0%2C0-11.3-4.421%2C37%2C37%2C0%2C0%2C0-13.519.024%2C38.075%2C38.075%2C0%2C0%2C0-14.689%2C5.777%2C39.32%2C39.32%2C0%2C0%2C0-10.689%2C10.572%2C40.675%2C40.675%2C0%2C0%2C0-5.918%2C13.684%2C37.211%2C37.211%2C0%2C0%2C0-.4%2C14.993%2C29.188%2C29.188%2C0%2C0%2C0%2C4.374%2C11.157%2C27.944%2C27.944%2C0%2C0%2C0%2C8.257%2C8.14%2C31.714%2C31.714%2C0%2C0%2C0%2C11.3%2C4.421%2C37%2C37%2C0%2C0%2C0%2C13.52-.023%2C38.085%2C38.085%2C0%2C0%2C0%2C14.689-5.778%2C39.322%2C39.322%2C0%2C0%2C0%2C10.689-10.573%2C40.662%2C40.662%2C0%2C0%2C0%2C5.918-13.683%2C37.207%2C37.207%2C0%2C0%2C0%2C.4-14.993%2C28.854%2C28.854%2C0%2C0%2C0-4.4-11.157A28.148%2C28.148%2C0%2C0%2C0%2C352.019%2C337.119Zm-7.859%2C31.67a19.692%2C19.692%2C0%2C0%2C1-2.2%2C6.385%2C17.532%2C17.532%2C0%2C0%2C1-4.28%2C5.1%2C13.6%2C13.6%2C0%2C0%2C1-6.386%2C2.83%2C14.928%2C14.928%2C0%2C0%2C1-5.777-.023%2C11.285%2C11.285%2C0%2C0%2C1-4.561-2.152%2C12.715%2C12.715%2C0%2C0%2C1-3.2-3.813A15.822%2C15.822%2C0%2C0%2C1%2C316%2C372.088a20.2%2C20.2%2C0%2C0%2C1%2C0-6.713%2C19.158%2C19.158%2C0%2C0%2C1%2C2.2-6.386%2C17.235%2C17.235%2C0%2C0%2C1%2C4.28-5.1%2C13.594%2C13.594%2C0%2C0%2C1%2C6.386-2.83%2C15.184%2C15.184%2C0%2C0%2C1%2C5.731.023%2C11.4%2C11.4%2C0%2C0%2C1%2C4.632%2C2.128%2C12.727%2C12.727%2C0%2C0%2C1%2C3.2%2C3.813%2C15.832%2C15.832%2C0%2C0%2C1%2C1.754%2C5.029A21%2C21%2C0%2C0%2C1%2C344.16%2C368.79Z%22%20transform%3D%22translate(-225.13%20-253.37)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_872%22%20data-name%3D%22Path%20872%22%20d%3D%22M683.176%2C288.759a27.941%2C27.941%2C0%2C0%2C0-8.257-8.14%2C31.884%2C31.884%2C0%2C0%2C0-11.3-4.421%2C37%2C37%2C0%2C0%2C0-13.52.023A38.083%2C38.083%2C0%2C0%2C0%2C635.413%2C282a39.314%2C39.314%2C0%2C0%2C0-10.689%2C10.573%2C40.671%2C40.671%2C0%2C0%2C0-5.918%2C13.683%2C37.219%2C37.219%2C0%2C0%2C0-.4%2C14.993%2C29.2%2C29.2%2C0%2C0%2C0%2C4.374%2C11.157%2C27.949%2C27.949%2C0%2C0%2C0%2C8.257%2C8.14%2C31.713%2C31.713%2C0%2C0%2C0%2C11.3%2C4.421%2C36.986%2C36.986%2C0%2C0%2C0%2C13.52-.023%2C38.081%2C38.081%2C0%2C0%2C0%2C14.689-5.778%2C38.983%2C38.983%2C0%2C0%2C0%2C10.689-10.572%2C40.66%2C40.66%2C0%2C0%2C0%2C5.918-13.684%2C37.213%2C37.213%2C0%2C0%2C0%2C.4-14.993A29.333%2C29.333%2C0%2C0%2C0%2C683.176%2C288.759Zm-16.116%2C23.53h0a19.681%2C19.681%2C0%2C0%2C1-2.2%2C6.386%2C17.54%2C17.54%2C0%2C0%2C1-4.28%2C5.1%2C13.6%2C13.6%2C0%2C0%2C1-6.386%2C2.83%2C14.928%2C14.928%2C0%2C0%2C1-5.777-.023%2C11.279%2C11.279%2C0%2C0%2C1-4.561-2.152%2C12.714%2C12.714%2C0%2C0%2C1-3.2-3.812%2C15.833%2C15.833%2C0%2C0%2C1-1.755-5.029%2C20.221%2C20.221%2C0%2C0%2C1%2C0-6.713%2C19.167%2C19.167%2C0%2C0%2C1%2C2.2-6.385%2C17.23%2C17.23%2C0%2C0%2C1%2C4.281-5.1%2C13.6%2C13.6%2C0%2C0%2C1%2C6.386-2.83%2C15.18%2C15.18%2C0%2C0%2C1%2C5.73.023%2C11.4%2C11.4%2C0%2C0%2C1%2C4.631%2C2.128%2C12.719%2C12.719%2C0%2C0%2C1%2C3.2%2C3.813%2C15.83%2C15.83%2C0%2C0%2C1%2C1.754%2C5.029A21%2C21%2C0%2C0%2C1%2C667.06%2C312.289Z%22%20transform%3D%22translate(-471.611%20-210.415)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_876%22%20data-name%3D%22Path%20876%22%20d%3D%22M980.225%2C251.208a25.033%2C25.033%2C0%2C0%2C0-6.34-2.83c-2.432-.725-5.192-1.38-8.21-1.965-2.409-.421-4.374-.8-5.871-1.076-1.5-.3-2.689-.585-3.531-.842a4.7%2C4.7%2C0%2C0%2C1-2.012-1.006%2C2.959%2C2.959%2C0%2C0%2C1-.819-1.637%2C2.886%2C2.886%2C0%2C0%2C1%2C1.287-3.017h0a9.453%2C9.453%2C0%2C0%2C1%2C3.719-1.357%2C27.093%2C27.093%2C0%2C0%2C1%2C11.04.374%2C40.762%2C40.762%2C0%2C0%2C1%2C9.286%2C3.415l9.332-16.139a40.629%2C40.629%2C0%2C0%2C0-13.426-4.561%2C50.77%2C50.77%2C0%2C0%2C0-16.794.234%2C38.411%2C38.411%2C0%2C0%2C0-11.789%2C3.929%2C29.557%2C29.557%2C0%2C0%2C0-8.327%2C6.479%2C21.93%2C21.93%2C0%2C0%2C0-4.584%2C8.14%2C19.592%2C19.592%2C0%2C0%2C0-.538%2C9.1%2C16.732%2C16.732%2C0%2C0%2C0%2C2.105%2C5.941%2C13.768%2C13.768%2C0%2C0%2C0%2C3.976%2C4.093%2C22.9%2C22.9%2C0%2C0%2C0%2C6.128%2C2.854%2C74.236%2C74.236%2C0%2C0%2C0%2C8.584%2C2.035c2.574.468%2C4.654.889%2C6.222%2C1.216%2C1.614.351%2C2.807.678%2C3.672.959a4.149%2C4.149%2C0%2C0%2C1%2C2.035%2C1.216%2C3.693%2C3.693%2C0%2C0%2C1%2C.726%2C1.661%2C3.207%2C3.207%2C0%2C0%2C1-1.217%2C3.134%2C7.877%2C7.877%2C0%2C0%2C1-3.742%2C1.544%2C31.058%2C31.058%2C0%2C0%2C1-11.7-.351%2C42.391%2C42.391%2C0%2C0%2C1-12.21-4.842L927.9%2C284.048a46.363%2C46.363%2C0%2C0%2C0%2C15.11%2C5.777%2C49.869%2C49.869%2C0%2C0%2C0%2C18.642.07%2C40.56%2C40.56%2C0%2C0%2C0%2C12.186-4%2C28.493%2C28.493%2C0%2C0%2C0%2C8.35-6.526%2C21.056%2C21.056%2C0%2C0%2C0%2C4.8-17.706%2C16.061%2C16.061%2C0%2C0%2C0-2.339-6.175A15.435%2C15.435%2C0%2C0%2C0%2C980.225%2C251.208Z%22%20transform%3D%22translate(-708.388%20-167.952)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_878%22%20data-name%3D%22Path%20878%22%20d%3D%22M1210.314%2C163.779l-1.615%2C18.127%2C19.577-3.415-4.489%2C49.938%2C20.7-3.626%2C4.468-49.938%2C19.577-3.415%2C1.614-18.151Z%22%20transform%3D%22translate(-922.745%20-117.026)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Union_1%22%20data-name%3D%22Union%201%22%20d%3D%22M5.847%2C21.472l35.366-6.2L76.346%2C9.145%2C128.575%2C0l-5.847%2C65.842-35.366%2C6.2L52.23%2C78.193%2C0%2C87.34Zm18.688%2C8.279L20.818%2C71.339l12.348-2.151%2C1.966-22.151%2C8.419%2C14.246L54.991%2C43.341%2C53%2C65.7l12.585-2.2%2C3.719-41.588L55.223%2C24.372%2C44.886%2C41.353l-7.6-13.824ZM90.17%2C18.29%2C74.662%2C21%2C70.943%2C62.591%2C83.6%2C60.37l1.1-12.164%2C4.023-.7%2C6.549%2C10.807L108.9%2C55.9%2C101%2C43.529l.444-.235a19.216%2C19.216%2C0%2C0%2C0%2C4.631-3.2%2C13.659%2C13.659%2C0%2C0%2C0%2C2.83-3.79%2C12.273%2C12.273%2C0%2C0%2C0%2C1.264-4.233%2C16.273%2C16.273%2C0%2C0%2C0-.117-4.516%2C14.214%2C14.214%2C0%2C0%2C0-1.52-4.327%2C9.941%2C9.941%2C0%2C0%2C0-2.971-3.275%2C13.434%2C13.434%2C0%2C0%2C0-6.036-2.128%2C21.99%2C21.99%2C0%2C0%2C0-2.819-.17A37.873%2C37.873%2C0%2C0%2C0%2C90.17%2C18.29ZM86.287%2C29.728l5.168-.912c2.059-.35%2C3.533-.187%2C4.562.539a3.468%2C3.468%2C0%2C0%2C1%2C1.426%2C2.315%2C4.61%2C4.61%2C0%2C0%2C1-1.285%2C3.977%2C8.859%2C8.859%2C0%2C0%2C1-5.193%2C2.409l-5.52.958Z%22%20transform%3D%22translate(6.713%200)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%3C%2Fsvg%3E" alt="MR BOOST" />
+    <span class="login__eyebrow"><span class="dot"></span>Boost CRM</span>
+    <h1 class="login__title">Beveiligd</h1>
+    <p class="login__sub">Voer je toegangscode in om de leads te bekijken.</p>
+    <form class="login__form" id="loginForm" autocomplete="off">
+      <input class="login__input" id="codeInput" type="password" inputmode="numeric" placeholder="Toegangscode" maxlength="12" autocomplete="off" />
+      <button type="submit" class="login__btn">Ontgrendel
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <p class="login__err" id="loginErr">Onjuiste code. Probeer opnieuw.</p>
+    </form>
+    <p class="login__hint">Toegang voor Mr Boost. Sessie blijft actief tot je het tabblad sluit.</p>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="topbar__brand">
+      <img class="topbar__logo" src="data:image/svg+xml;utf8,%3Csvg%20id%3D%22Group_48868%22%20data-name%3D%22Group%2048868%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22347.402%22%20height%3D%22165.429%22%20viewBox%3D%220%200%20347.402%20165.429%22%3E%0A%20%20%3Cpath%20id%3D%22Path_874%22%20data-name%3D%22Path%20874%22%20d%3D%22M762.1%2C275.1%22%20transform%3D%22translate(-582.166%20-210.346)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_859%22%20data-name%3D%22Path%20859%22%20d%3D%22M55.692%2C387.9a21.765%2C21.765%2C0%2C0%2C0-8.093-2.035%2C50.929%2C50.929%2C0%2C0%2C0-12.631.912L6.081%2C391.857%2C0%2C459.923l35.226-6.175a58.414%2C58.414%2C0%2C0%2C0%2C14.128-4.07%2C28.536%2C28.536%2C0%2C0%2C0%2C8.842-5.895%2C16.577%2C16.577%2C0%2C0%2C0%2C4.234-7.111%2C17.8%2C17.8%2C0%2C0%2C0%2C.351-7.859%2C11.817%2C11.817%2C0%2C0%2C0-4.234-7.508%2C14.9%2C14.9%2C0%2C0%2C0-8.163-3.088l-2.9-.234%2C2.643-1.193c4.748-2.152%2C8.163-4.982%2C10.151-8.444a15.962%2C15.962%2C0%2C0%2C0%2C1.988-10.97%2C15.335%2C15.335%2C0%2C0%2C0-2.058-5.427A10.819%2C10.819%2C0%2C0%2C0%2C55.692%2C387.9ZM39.787%2C435.363a11.878%2C11.878%2C0%2C0%2C1-6.479%2C2.947l-11.7%2C2.058%2C1.076-11.906%2C10.175-1.778c5.216-.912%2C8.163.281%2C8.725%2C3.555A5.686%2C5.686%2C0%2C0%2C1%2C39.787%2C435.363Zm1.707-24.607c-1.263%2C1.45-3.368%2C2.433-6.432%2C2.97l-11.227%2C1.965.982-11.3%2C9.8-1.73a11.892%2C11.892%2C0%2C0%2C1%2C5.754.023%2C4.033%2C4.033%2C0%2C0%2C1%2C2.643%2C3.3A5.623%2C5.623%2C0%2C0%2C1%2C41.494%2C410.757Z%22%20transform%3D%22translate(0%20-294.494)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_866%22%20data-name%3D%22Path%20866%22%20d%3D%22M352.019%2C337.119a31.707%2C31.707%2C0%2C0%2C0-11.3-4.421%2C37%2C37%2C0%2C0%2C0-13.519.024%2C38.075%2C38.075%2C0%2C0%2C0-14.689%2C5.777%2C39.32%2C39.32%2C0%2C0%2C0-10.689%2C10.572%2C40.675%2C40.675%2C0%2C0%2C0-5.918%2C13.684%2C37.211%2C37.211%2C0%2C0%2C0-.4%2C14.993%2C29.188%2C29.188%2C0%2C0%2C0%2C4.374%2C11.157%2C27.944%2C27.944%2C0%2C0%2C0%2C8.257%2C8.14%2C31.714%2C31.714%2C0%2C0%2C0%2C11.3%2C4.421%2C37%2C37%2C0%2C0%2C0%2C13.52-.023%2C38.085%2C38.085%2C0%2C0%2C0%2C14.689-5.778%2C39.322%2C39.322%2C0%2C0%2C0%2C10.689-10.573%2C40.662%2C40.662%2C0%2C0%2C0%2C5.918-13.683%2C37.207%2C37.207%2C0%2C0%2C0%2C.4-14.993%2C28.854%2C28.854%2C0%2C0%2C0-4.4-11.157A28.148%2C28.148%2C0%2C0%2C0%2C352.019%2C337.119Zm-7.859%2C31.67a19.692%2C19.692%2C0%2C0%2C1-2.2%2C6.385%2C17.532%2C17.532%2C0%2C0%2C1-4.28%2C5.1%2C13.6%2C13.6%2C0%2C0%2C1-6.386%2C2.83%2C14.928%2C14.928%2C0%2C0%2C1-5.777-.023%2C11.285%2C11.285%2C0%2C0%2C1-4.561-2.152%2C12.715%2C12.715%2C0%2C0%2C1-3.2-3.813A15.822%2C15.822%2C0%2C0%2C1%2C316%2C372.088a20.2%2C20.2%2C0%2C0%2C1%2C0-6.713%2C19.158%2C19.158%2C0%2C0%2C1%2C2.2-6.386%2C17.235%2C17.235%2C0%2C0%2C1%2C4.28-5.1%2C13.594%2C13.594%2C0%2C0%2C1%2C6.386-2.83%2C15.184%2C15.184%2C0%2C0%2C1%2C5.731.023%2C11.4%2C11.4%2C0%2C0%2C1%2C4.632%2C2.128%2C12.727%2C12.727%2C0%2C0%2C1%2C3.2%2C3.813%2C15.832%2C15.832%2C0%2C0%2C1%2C1.754%2C5.029A21%2C21%2C0%2C0%2C1%2C344.16%2C368.79Z%22%20transform%3D%22translate(-225.13%20-253.37)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_872%22%20data-name%3D%22Path%20872%22%20d%3D%22M683.176%2C288.759a27.941%2C27.941%2C0%2C0%2C0-8.257-8.14%2C31.884%2C31.884%2C0%2C0%2C0-11.3-4.421%2C37%2C37%2C0%2C0%2C0-13.52.023A38.083%2C38.083%2C0%2C0%2C0%2C635.413%2C282a39.314%2C39.314%2C0%2C0%2C0-10.689%2C10.573%2C40.671%2C40.671%2C0%2C0%2C0-5.918%2C13.683%2C37.219%2C37.219%2C0%2C0%2C0-.4%2C14.993%2C29.2%2C29.2%2C0%2C0%2C0%2C4.374%2C11.157%2C27.949%2C27.949%2C0%2C0%2C0%2C8.257%2C8.14%2C31.713%2C31.713%2C0%2C0%2C0%2C11.3%2C4.421%2C36.986%2C36.986%2C0%2C0%2C0%2C13.52-.023%2C38.081%2C38.081%2C0%2C0%2C0%2C14.689-5.778%2C38.983%2C38.983%2C0%2C0%2C0%2C10.689-10.572%2C40.66%2C40.66%2C0%2C0%2C0%2C5.918-13.684%2C37.213%2C37.213%2C0%2C0%2C0%2C.4-14.993A29.333%2C29.333%2C0%2C0%2C0%2C683.176%2C288.759Zm-16.116%2C23.53h0a19.681%2C19.681%2C0%2C0%2C1-2.2%2C6.386%2C17.54%2C17.54%2C0%2C0%2C1-4.28%2C5.1%2C13.6%2C13.6%2C0%2C0%2C1-6.386%2C2.83%2C14.928%2C14.928%2C0%2C0%2C1-5.777-.023%2C11.279%2C11.279%2C0%2C0%2C1-4.561-2.152%2C12.714%2C12.714%2C0%2C0%2C1-3.2-3.812%2C15.833%2C15.833%2C0%2C0%2C1-1.755-5.029%2C20.221%2C20.221%2C0%2C0%2C1%2C0-6.713%2C19.167%2C19.167%2C0%2C0%2C1%2C2.2-6.385%2C17.23%2C17.23%2C0%2C0%2C1%2C4.281-5.1%2C13.6%2C13.6%2C0%2C0%2C1%2C6.386-2.83%2C15.18%2C15.18%2C0%2C0%2C1%2C5.73.023%2C11.4%2C11.4%2C0%2C0%2C1%2C4.631%2C2.128%2C12.719%2C12.719%2C0%2C0%2C1%2C3.2%2C3.813%2C15.83%2C15.83%2C0%2C0%2C1%2C1.754%2C5.029A21%2C21%2C0%2C0%2C1%2C667.06%2C312.289Z%22%20transform%3D%22translate(-471.611%20-210.415)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_876%22%20data-name%3D%22Path%20876%22%20d%3D%22M980.225%2C251.208a25.033%2C25.033%2C0%2C0%2C0-6.34-2.83c-2.432-.725-5.192-1.38-8.21-1.965-2.409-.421-4.374-.8-5.871-1.076-1.5-.3-2.689-.585-3.531-.842a4.7%2C4.7%2C0%2C0%2C1-2.012-1.006%2C2.959%2C2.959%2C0%2C0%2C1-.819-1.637%2C2.886%2C2.886%2C0%2C0%2C1%2C1.287-3.017h0a9.453%2C9.453%2C0%2C0%2C1%2C3.719-1.357%2C27.093%2C27.093%2C0%2C0%2C1%2C11.04.374%2C40.762%2C40.762%2C0%2C0%2C1%2C9.286%2C3.415l9.332-16.139a40.629%2C40.629%2C0%2C0%2C0-13.426-4.561%2C50.77%2C50.77%2C0%2C0%2C0-16.794.234%2C38.411%2C38.411%2C0%2C0%2C0-11.789%2C3.929%2C29.557%2C29.557%2C0%2C0%2C0-8.327%2C6.479%2C21.93%2C21.93%2C0%2C0%2C0-4.584%2C8.14%2C19.592%2C19.592%2C0%2C0%2C0-.538%2C9.1%2C16.732%2C16.732%2C0%2C0%2C0%2C2.105%2C5.941%2C13.768%2C13.768%2C0%2C0%2C0%2C3.976%2C4.093%2C22.9%2C22.9%2C0%2C0%2C0%2C6.128%2C2.854%2C74.236%2C74.236%2C0%2C0%2C0%2C8.584%2C2.035c2.574.468%2C4.654.889%2C6.222%2C1.216%2C1.614.351%2C2.807.678%2C3.672.959a4.149%2C4.149%2C0%2C0%2C1%2C2.035%2C1.216%2C3.693%2C3.693%2C0%2C0%2C1%2C.726%2C1.661%2C3.207%2C3.207%2C0%2C0%2C1-1.217%2C3.134%2C7.877%2C7.877%2C0%2C0%2C1-3.742%2C1.544%2C31.058%2C31.058%2C0%2C0%2C1-11.7-.351%2C42.391%2C42.391%2C0%2C0%2C1-12.21-4.842L927.9%2C284.048a46.363%2C46.363%2C0%2C0%2C0%2C15.11%2C5.777%2C49.869%2C49.869%2C0%2C0%2C0%2C18.642.07%2C40.56%2C40.56%2C0%2C0%2C0%2C12.186-4%2C28.493%2C28.493%2C0%2C0%2C0%2C8.35-6.526%2C21.056%2C21.056%2C0%2C0%2C0%2C4.8-17.706%2C16.061%2C16.061%2C0%2C0%2C0-2.339-6.175A15.435%2C15.435%2C0%2C0%2C0%2C980.225%2C251.208Z%22%20transform%3D%22translate(-708.388%20-167.952)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_878%22%20data-name%3D%22Path%20878%22%20d%3D%22M1210.314%2C163.779l-1.615%2C18.127%2C19.577-3.415-4.489%2C49.938%2C20.7-3.626%2C4.468-49.938%2C19.577-3.415%2C1.614-18.151Z%22%20transform%3D%22translate(-922.745%20-117.026)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Union_1%22%20data-name%3D%22Union%201%22%20d%3D%22M5.847%2C21.472l35.366-6.2L76.346%2C9.145%2C128.575%2C0l-5.847%2C65.842-35.366%2C6.2L52.23%2C78.193%2C0%2C87.34Zm18.688%2C8.279L20.818%2C71.339l12.348-2.151%2C1.966-22.151%2C8.419%2C14.246L54.991%2C43.341%2C53%2C65.7l12.585-2.2%2C3.719-41.588L55.223%2C24.372%2C44.886%2C41.353l-7.6-13.824ZM90.17%2C18.29%2C74.662%2C21%2C70.943%2C62.591%2C83.6%2C60.37l1.1-12.164%2C4.023-.7%2C6.549%2C10.807L108.9%2C55.9%2C101%2C43.529l.444-.235a19.216%2C19.216%2C0%2C0%2C0%2C4.631-3.2%2C13.659%2C13.659%2C0%2C0%2C0%2C2.83-3.79%2C12.273%2C12.273%2C0%2C0%2C0%2C1.264-4.233%2C16.273%2C16.273%2C0%2C0%2C0-.117-4.516%2C14.214%2C14.214%2C0%2C0%2C0-1.52-4.327%2C9.941%2C9.941%2C0%2C0%2C0-2.971-3.275%2C13.434%2C13.434%2C0%2C0%2C0-6.036-2.128%2C21.99%2C21.99%2C0%2C0%2C0-2.819-.17A37.873%2C37.873%2C0%2C0%2C0%2C90.17%2C18.29ZM86.287%2C29.728l5.168-.912c2.059-.35%2C3.533-.187%2C4.562.539a3.468%2C3.468%2C0%2C0%2C1%2C1.426%2C2.315%2C4.61%2C4.61%2C0%2C0%2C1-1.285%2C3.977%2C8.859%2C8.859%2C0%2C0%2C1-5.193%2C2.409l-5.52.958Z%22%20transform%3D%22translate(6.713%200)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%3C%2Fsvg%3E" alt="MR BOOST" />
+      <span class="topbar__name">CRM · Leads</span>
+    </div>
+    <div class="topbar__spacer"></div>
+    <span class="conn" id="conn" title="Verbindingsstatus"><span class="conn__d"></span><span id="connTxt">Lokaal</span></span>
+    <button class="topbar__btn" id="refreshBtn">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 10-1.6 4.8M20 4v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Vernieuwen</span>
+    </button>
+    <button class="topbar__btn" id="exportBtn">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Exporteer CSV</span>
+    </button>
+    <button class="topbar__btn topbar__btn--ghost" id="logoutBtn">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 12H3m0 0l4-4m-4 4l4 4M21 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Uitloggen</span>
+    </button>
+  </header>
+
+  <div class="wrap">
+    <div class="stats" id="stats"></div>
+    <div id="boardHost"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ====== BOOST CRM CONFIG — zelfde URL als in boost-scan.html (zie boost-crm-setup.md). Leeg = lokale modus. ====== -->
+<script>window.BOOST_CONFIG = { endpoint: "" };</script>
+
+<script>
+(function(){
+  'use strict';
+  var CODE = '84028402';
+  var LEADS_KEY = 'boostLeads';
+  var AUTH_KEY = 'boostCrmAuth';
+
+  var loginEl = document.getElementById('login');
+  var appEl = document.getElementById('app');
+  var form = document.getElementById('loginForm');
+  var input = document.getElementById('codeInput');
+  var errEl = document.getElementById('loginErr');
+
+  var selectedId = null;
+
+  /* ---------- auth ---------- */
+  function isAuthed(){ try { return sessionStorage.getItem(AUTH_KEY) === '1'; } catch(e){ return false; } }
+  function openApp(){ loginEl.style.display='none'; appEl.classList.add('show'); render(); syncRemote(); }
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(input.value.trim() === CODE){
+      try { sessionStorage.setItem(AUTH_KEY,'1'); } catch(e){}
+      errEl.classList.remove('show'); openApp();
+    } else {
+      errEl.classList.add('show'); loginEl.classList.add('shake');
+      setTimeout(function(){ loginEl.classList.remove('shake'); }, 460);
+      input.value=''; input.focus();
+    }
+  });
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    try { sessionStorage.removeItem(AUTH_KEY); } catch(e){}
+    appEl.classList.remove('show'); loginEl.style.display='flex'; input.value=''; input.focus();
+  });
+
+  /* ---------- data ---------- */
+  function load(){ try { return JSON.parse(localStorage.getItem(LEADS_KEY) || '[]'); } catch(e){ return []; } }
+  function save(leads){ try { localStorage.setItem(LEADS_KEY, JSON.stringify(leads)); } catch(e){} }
+
+  /* ---------- remote (optional CRM backend) ---------- */
+  function endpoint(){ var c = window.BOOST_CONFIG || {}; return c.endpoint || ''; }
+  function setConn(live){
+    var el = document.getElementById('conn'); if(!el) return;
+    el.classList.toggle('is-live', !!live);
+    document.getElementById('connTxt').textContent = live ? 'Live' : 'Lokaal';
+  }
+  function fetchRemote(cb){
+    var ep = endpoint();
+    if(!ep){ cb(null); return; }
+    var name = '__boostCb' + Date.now();
+    var s = document.createElement('script');
+    var done = false;
+    window[name] = function(data){ done = true; try{ delete window[name]; }catch(e){ window[name]=undefined; } s.remove(); cb(data && data.leads ? data.leads : []); };
+    s.onerror = function(){ if(done) return; try{ delete window[name]; }catch(e){} s.remove(); cb(null); };
+    s.src = ep + (ep.indexOf('?')>-1?'&':'?') + 'action=list&callback=' + name + '&_=' + Date.now();
+    document.body.appendChild(s);
+    setTimeout(function(){ if(!done){ s.remove(); cb(null); } }, 8000);
+  }
+  function syncRemote(){
+    if(!endpoint()){ setConn(false); return; }
+    fetchRemote(function(remote){
+      if(remote === null){ setConn(false); return; }
+      setConn(true);
+      var map = {};
+      remote.forEach(function(l){ map[l.id] = l; });
+      load().forEach(function(l){ if(!map[l.id]) map[l.id] = l; }); // keep just-submitted local-only leads
+      var merged = Object.keys(map).map(function(k){ return map[k]; }).sort(function(a,b){ return b.ts - a.ts; });
+      save(merged); render();
+    });
+  }
+  function postAction(obj){
+    var ep = endpoint(); if(!ep) return;
+    try { fetch(ep, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(obj) }); } catch(e){}
+  }
+
+  function initials(name, company){
+    var s = (name||company||'?').trim().split(/\s+/);
+    if(s.length>=2) return (s[0][0]+s[1][0]).toUpperCase();
+    return (s[0]||'?').slice(0,2).toUpperCase();
+  }
+  function esc(t){ return (t==null?'':String(t)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function timeAgo(ts){
+    var d = Date.now()-ts, m=Math.floor(d/60000), h=Math.floor(m/60), day=Math.floor(h/24);
+    if(m<1) return 'zojuist'; if(m<60) return m+' min geleden'; if(h<24) return h+' uur geleden';
+    if(day<7) return day+' d geleden';
+    return new Date(ts).toLocaleDateString('nl-NL',{day:'numeric',month:'short'});
+  }
+  function fullDate(ts){ return new Date(ts).toLocaleString('nl-NL',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}); }
+  var STATUS_LABEL = { new:'Nieuw', called:'Gebeld', won:'Gewonnen' };
+
+  /* ---------- render ---------- */
+  var searchTerm = '';
+
+  function render(){
+    var leads = load();
+    renderStats(leads);
+    var host = document.getElementById('boardHost');
+    if(!leads.length){ host.innerHTML = emptyHTML(); wireEmpty(); return; }
+
+    if(!selectedId || !leads.some(function(l){return l.id===selectedId;})) selectedId = leads[0].id;
+    var filtered = leads.filter(function(l){
+      if(!searchTerm) return true;
+      var hay = (l.name+' '+l.company+' '+l.email).toLowerCase();
+      return hay.indexOf(searchTerm.toLowerCase()) !== -1;
+    });
+
+    host.innerHTML =
+      '<div class="board">' +
+        '<div class="list-col">' +
+          '<div class="list-head">' +
+            '<div class="search">' +
+              '<svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' +
+              '<input id="searchInput" type="text" placeholder="Zoek op naam, bedrijf of e-mail" value="'+esc(searchTerm)+'" />' +
+            '</div>' +
+          '</div>' +
+          '<div class="list" id="list">' + filtered.map(rowHTML).join('') +
+            (filtered.length? '' : '<div style="padding:30px;text-align:center;color:var(--text-dim);font-size:14px;">Geen resultaten.</div>') +
+          '</div>' +
+        '</div>' +
+        '<div class="detail" id="detail">' + detailHTML(leads) + '</div>' +
+      '</div>';
+    wireBoard();
+  }
+
+  function renderStats(leads){
+    var today = leads.filter(function(l){ var d=new Date(l.ts), n=new Date(); return d.toDateString()===n.toDateString(); }).length;
+    var high = leads.filter(function(l){ return l.value==='€25K – €50K' || l.value==='€50K+'; }).length;
+    var newCount = leads.filter(function(l){ return (l.status||'new')==='new'; }).length;
+    document.getElementById('stats').innerHTML =
+      stat('Totaal leads', leads.length) +
+      stat('Nieuw', newCount) +
+      stat('Vandaag', today) +
+      stat('Hoge waarde', high, '≥ €25K');
+  }
+  function stat(label, val, unit){ return '<div class="stat"><div class="stat__label">'+label+'</div><div class="stat__value">'+val+(unit?'<span class="u"> '+unit+'</span>':'')+'</div></div>'; }
+
+  function rowHTML(l){
+    var st = l.status||'new';
+    return '<div class="lead'+(l.id===selectedId?' is-active':'')+'" data-id="'+l.id+'">' +
+      '<div class="lead__avatar">'+initials(l.name,l.company)+'</div>' +
+      '<div class="lead__main">' +
+        '<div class="lead__name">'+esc(l.name||'Onbekend')+'</div>' +
+        '<div class="lead__company">'+esc(l.company||'—')+'</div>' +
+      '</div>' +
+      '<div class="lead__meta">' +
+        '<div class="lead__time">'+timeAgo(l.ts)+'</div>' +
+        '<div class="lead__status st-'+st+'"><span class="d"></span>'+STATUS_LABEL[st]+'</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function detailHTML(leads){
+    var l = leads.filter(function(x){return x.id===selectedId;})[0];
+    if(!l){ return '<div class="detail__empty"><svg viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.6"/></svg><p>Selecteer een lead</p></div>'; }
+    var st = l.status||'new';
+    function chips(arr){ if(!arr||!arr.length) return '<span class="ans__none">—</span>'; return arr.map(function(a){return '<span class="chip">'+esc(a)+'</span>';}).join(''); }
+    return '' +
+      '<div class="detail__back" id="detailBack"><svg viewBox="0 0 24 24" fill="none"><path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Terug naar lijst</div>' +
+      '<div class="detail__head">' +
+        '<div class="detail__avatar">'+initials(l.name,l.company)+'</div>' +
+        '<div class="detail__id">' +
+          '<div class="detail__name">'+esc(l.name||'Onbekend')+'</div>' +
+          '<div class="detail__company">'+esc(l.company||'—')+'</div>' +
+          '<div class="detail__when">Aangevraagd · '+fullDate(l.ts)+'</div>' +
+        '</div>' +
+        '<button class="detail__del" id="delBtn" title="Verwijder lead"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+      '</div>' +
+      '<div class="detail__body">' +
+        '<div class="contact-row">' +
+          contact('mail','E-mail', l.email, 'mailto:'+encodeURIComponent(l.email||'')) +
+          contact('phone','Telefoon', l.phone||'—', l.phone?('tel:'+l.phone.replace(/\\s/g,'')):null) +
+        '</div>' +
+        '<div class="status-pills" id="statusPills">' +
+          '<button class="status-pill '+(st==='new'?'on-new':'')+'" data-status="new">Nieuw</button>' +
+          '<button class="status-pill '+(st==='called'?'on-called':'')+'" data-status="called">Gebeld</button>' +
+          '<button class="status-pill '+(st==='won'?'on-won':'')+'" data-status="won">Gewonnen</button>' +
+        '</div>' +
+        '<div class="ans"><div class="ans__label">Wat herken je het meest?</div><div class="ans__chips">'+chips(l.recognise)+'</div></div>' +
+        '<div class="ans"><div class="ans__label">Waar wil je naartoe?</div><div class="ans__chips">'+chips(l.ambition)+'</div></div>' +
+        '<div class="ans"><div class="ans__label">Wat gebeurt er als je niks verandert?</div><div class="ans__chips">'+chips(l.risk)+'</div></div>' +
+        '<div class="ans"><div class="ans__label">Wat is het je waard?</div><div class="ans__chips">'+(l.value?'<span class="chip chip--value">'+esc(l.value)+'</span>':'<span class="ans__none">—</span>')+'</div></div>' +
+      '</div>';
+  }
+  function contact(ic, label, val, href){
+    var icon = ic==='mail'
+      ? '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.7"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none"><path d="M5 4h3l2 5-2 1a11 11 0 005 5l1-2 5 2v3a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+    var inner = '<div class="contact__ic">'+icon+'</div><div class="contact__t"><div class="contact__l">'+label+'</div><div class="contact__v">'+esc(val||'—')+'</div></div>';
+    return href ? '<a class="contact" href="'+href+'">'+inner+'</a>' : '<div class="contact">'+inner+'</div>';
+  }
+
+  function emptyHTML(){
+    return '<div class="empty">' +
+      '<div class="empty__ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>' +
+      '<div class="empty__title">Nog geen leads</div>' +
+      '<p class="empty__sub">Zodra iemand de Boost Scan invult, verschijnt de aanvraag hier — inclusief alle antwoorden. Test het zelf, of genereer een voorbeeld-lead.</p>' +
+      '<button class="empty__btn" id="seedBtn">Genereer voorbeeld-lead</button>' +
+    '</div>';
+  }
+
+  /* ---------- wiring ---------- */
+  function wireBoard(){
+    var si = document.getElementById('searchInput');
+    if(si){ si.addEventListener('input', function(){ searchTerm = si.value; var pos=si.selectionStart; render(); var ns=document.getElementById('searchInput'); if(ns){ ns.focus(); try{ns.setSelectionRange(pos,pos);}catch(e){} } }); }
+    document.querySelectorAll('.lead').forEach(function(row){
+      row.addEventListener('click', function(){ selectedId = row.getAttribute('data-id'); render(); var d=document.getElementById('detail'); if(d && window.innerWidth<=920) d.classList.add('is-open'); });
+    });
+    var back = document.getElementById('detailBack');
+    if(back) back.addEventListener('click', function(){ var d=document.getElementById('detail'); if(d) d.classList.remove('is-open'); });
+    var del = document.getElementById('delBtn');
+    if(del) del.addEventListener('click', function(){
+      postAction({ type:'delete', id:selectedId });
+      var leads = load().filter(function(l){ return l.id!==selectedId; });
+      save(leads); selectedId=null; render(); toast('Lead verwijderd');
+    });
+    document.querySelectorAll('#statusPills .status-pill').forEach(function(p){
+      p.addEventListener('click', function(){
+        var s = p.getAttribute('data-status');
+        postAction({ type:'status', id:selectedId, status:s });
+        var leads = load(); leads.forEach(function(l){ if(l.id===selectedId) l.status=s; }); save(leads); render(); toast('Status: '+STATUS_LABEL[s]);
+      });
+    });
+  }
+  function wireEmpty(){
+    var sb = document.getElementById('seedBtn');
+    if(sb) sb.addEventListener('click', function(){
+      var leads = load();
+      leads.unshift({ id:'L'+Date.now().toString(36).toUpperCase(), ts:Date.now()-3600000,
+        name:'Sanne de Vries', company:'Atelier Noord', email:'sanne@ateliernoord.nl', phone:'+31 6 24 81 33 90',
+        recognise:['Zwakke branding','Te weinig aandacht','Meer potentieel dan resultaat'],
+        ambition:['Sterker merk','Premium klanten','Meer omzet'],
+        risk:['Concurrenten groeien harder','Onzichtbaar blijven'],
+        value:'€25K – €50K', status:'new' });
+      save(leads); selectedId=null; render(); toast('Voorbeeld-lead toegevoegd');
+    });
+  }
+
+  document.getElementById('refreshBtn').addEventListener('click', function(){
+    if(!endpoint()){ toast('Geen koppeling — lokale modus'); render(); return; }
+    toast('Vernieuwen…'); syncRemote();
+  });
+
+  /* ---------- export ---------- */
+  document.getElementById('exportBtn').addEventListener('click', function(){
+    var leads = load();
+    if(!leads.length){ toast('Geen leads om te exporteren'); return; }
+    var cols = ['Datum','Naam','Bedrijf','E-mail','Telefoon','Status','Herkenning','Ambitie','Risico','Waarde'];
+    var rows = leads.map(function(l){
+      return [ new Date(l.ts).toLocaleString('nl-NL'), l.name, l.company, l.email, l.phone, STATUS_LABEL[l.status||'new'],
+        (l.recognise||[]).join(' | '), (l.ambition||[]).join(' | '), (l.risk||[]).join(' | '), l.value ].map(csvCell).join(',');
+    });
+    var csv = cols.join(',') + '\\n' + rows.join('\\n');
+    var blob = new Blob(['\\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'boost-leads-'+new Date().toISOString().slice(0,10)+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    toast(leads.length+' leads geëxporteerd');
+  });
+  function csvCell(v){ v = (v==null?'':String(v)); return '"'+v.replace(/"/g,'""')+'"'; }
+
+  /* ---------- toast ---------- */
+  var toastEl = document.getElementById('toast'), toastT=null;
+  function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){ toastEl.classList.remove('show'); },2200); }
+
+  /* ---------- boot ---------- */
+  if(isAuthed()) openApp(); else { input.focus(); }
+  // live refresh if a lead comes in from another tab
+  window.addEventListener('storage', function(e){ if(e.key===LEADS_KEY && appEl.classList.contains('show')) render(); });
+})();
+</script>
+
+</body>
+</html>

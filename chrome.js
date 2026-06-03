@@ -151,80 +151,17 @@
     return nav;
   }
 
-  /* ---------- START-A-PROJECT FAB + DRAWER ---------- */
+  /* ---------- START BOOST SCAN FAB ----------
+     Links straight to the multi-step Boost Scan page. The old slide-in
+     project form has been retired in favour of boost-scan.html. */
   function buildFAB() {
-    const fab = document.createElement('button');
-    fab.type = 'button';
+    const qs = window.location.search || '';
+    const fab = document.createElement('a');
+    fab.href = 'boost-scan.html' + qs;
     fab.className = 'sp-fab';
-    fab.setAttribute('aria-label', 'Start een project');
-    fab.innerHTML = `Start a project <span class="sp-fab__dot-mark">${DOT_MARK_SVG}</span>`;
+    fab.setAttribute('aria-label', 'Start Boost Scan');
+    fab.innerHTML = `Start Boost Scan <span class="sp-fab__dot-mark">${DOT_MARK_SVG}</span>`;
     document.body.appendChild(fab);
-
-    const backdrop = document.createElement('div');
-    backdrop.className = 'sp-drawer-backdrop';
-    backdrop.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(backdrop);
-
-    const drawer = document.createElement('aside');
-    drawer.className = 'sp-drawer';
-    drawer.setAttribute('role', 'dialog');
-    drawer.setAttribute('aria-modal', 'true');
-    drawer.setAttribute('aria-label', 'Start een project');
-    drawer.setAttribute('aria-hidden', 'true');
-    drawer.setAttribute('data-lenis-prevent', '');
-    drawer.innerHTML = `
-      <button type="button" class="sp-drawer__close" aria-label="Sluit formulier">
-        <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <div class="sp-drawer__inner">
-        <h2 class="sp-drawer__title">Klaar om te <span class="dim">beginnen?</span></h2>
-        <form class="sp-form" novalidate>
-          <div class="sp-form__row">
-            <div class="sp-field"><input type="text" required placeholder="Jouw naam *" name="name" /></div>
-            <div class="sp-field"><input type="email" required placeholder="E-mail *" name="email" /></div>
-          </div>
-          <div class="sp-field"><input type="tel" placeholder="Telefoon (optioneel)" name="phone" /></div>
-          <div class="sp-field"><textarea required placeholder="Vertel ons over je project *" name="message"></textarea></div>
-          <p class="sp-form__eyebrow">Ik ben geïnteresseerd in</p>
-          <div class="sp-form__services">
-            ${SERVICES.map((s) => `
-              <label class="sp-check">
-                <input type="checkbox" name="service" value="${s}" />
-                <span class="sp-check__circle"></span>
-                <span class="sp-check__label">${s}</span>
-              </label>`).join('')}
-          </div>
-          <button type="submit" class="sp-form__submit">
-            Verstuur bericht <span class="sp-fab__dot-mark">${DOT_MARK_SVG}</span>
-          </button>
-        </form>
-      </div>`;
-    document.body.appendChild(drawer);
-
-    let isOpen = false;
-    const openDrawer = () => {
-      isOpen = true;
-      drawer.classList.add('is-open');
-      backdrop.classList.add('is-open');
-      drawer.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
-      if (window.__lenis && typeof window.__lenis.stop === 'function') window.__lenis.stop();
-    };
-    const closeDrawer = () => {
-      isOpen = false;
-      drawer.classList.remove('is-open');
-      backdrop.classList.remove('is-open');
-      drawer.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-      if (window.__lenis && typeof window.__lenis.start === 'function') window.__lenis.start();
-    };
-    fab.addEventListener('click', openDrawer);
-    backdrop.addEventListener('click', closeDrawer);
-    drawer.querySelector('.sp-drawer__close').addEventListener('click', closeDrawer);
-    drawer.querySelector('form').addEventListener('submit', (e) => { e.preventDefault(); closeDrawer(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeDrawer(); });
 
     // Scroll-driven visibility
     let raf = null;
@@ -233,12 +170,12 @@
       raf = requestAnimationFrame(() => {
         raf = null;
         const scrolled = (window.scrollY || 0) > 80;
-        fab.classList.toggle('is-visible', scrolled && !isOpen);
+        fab.classList.toggle('is-visible', scrolled);
       });
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
-    return { fab, drawer, backdrop };
+    return { fab };
   }
 
   /* ---------- HAMBURGER SCROLL VISIBILITY ---------- */
@@ -328,8 +265,9 @@
             <p class="chrome-footer-col__eyebrow">Socials</p>
             <div class="chrome-footer-col__links">
               <a href="#">Instagram</a>
+              <a href="https://www.tiktok.com/@themrboost" target="_blank" rel="noopener">TikTok</a>
               <a href="#">LinkedIn</a>
-              <a href="#">Behance</a>
+              <a href="https://www.youtube.com/@Mr-Boost/videos" target="_blank" rel="noopener">YouTube</a>
             </div>
           </div>
         </div>
@@ -431,6 +369,31 @@
     });
   }
 
+  /* ---------- PIN BLUR TO THE *VISIBLE* VIEWPORT BOTTOM (iOS Safari) ----------
+     position:fixed; bottom:0 anchors to the layout viewport, whose bottom on iOS
+     sits behind the dynamic toolbar — leaving a strip of sharp content above the
+     bar. We translate the blur down/up so its bottom edge always tracks the truly
+     visible bottom (window.visualViewport). No-op on desktop (offset = 0). */
+  function pinProgressiveBlur() {
+    const blur = document.querySelector('.progressive-blur');
+    const vv = window.visualViewport;
+    if (!blur || !vv) return;
+    let raf = 0;
+    function apply() {
+      raf = 0;
+      // visible bottom (in layout-viewport coords) minus layout height.
+      // negative when the toolbar/keyboard shrinks the visible area.
+      const offset = (vv.height + vv.offsetTop) - window.innerHeight;
+      blur.style.transform = 'translate3d(0,' + offset + 'px,0)';
+    }
+    function schedule() { if (!raf) raf = requestAnimationFrame(apply); }
+    vv.addEventListener('resize', schedule);
+    vv.addEventListener('scroll', schedule);
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    apply();
+  }
+
   /* ---------- BOOTSTRAP ---------- */
   function start() {
     document.body.classList.add('has-chrome');
@@ -446,6 +409,7 @@
     requestAnimationFrame(() => {
       wireChromeNav();
       setupFooterScroll();
+      pinProgressiveBlur();
       // If GSAP is still loading, retry once
       if (!window.gsap || !window.ScrollTrigger) {
         setTimeout(setupFooterScroll, 500);

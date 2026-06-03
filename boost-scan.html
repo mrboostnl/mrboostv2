@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Boost Scan — MR BOOST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: 'Gotham Ultra';
+    src: url('assets/GothamUltra.otf') format('opentype');
+    font-weight: 900; font-style: normal; font-display: swap;
+  }
+  @font-face { font-family:'Helvetica Neue'; src: local('Helvetica Neue'),local('HelveticaNeue'),local('Helvetica'),local('Arial'); font-weight:400; }
+  @font-face { font-family:'Helvetica Neue'; src: local('Helvetica Neue Medium'),local('HelveticaNeue-Medium'),local('Helvetica'),local('Arial'); font-weight:500; }
+  @font-face { font-family:'Helvetica Neue'; src: local('Helvetica Neue Bold'),local('HelveticaNeue-Bold'),local('Helvetica-Bold'),local('Arial'); font-weight:700; }
+</style>
+<style>
+:root{
+  --bg:#0a0a0a;
+  --bg-2:#0e0e0d;
+  --text:#f2f2f2;
+  --text-dim:#8a8a8a;
+  --cream:#e9e8e3;
+  --cream-2:#d9d8d2;
+  --yellow:#F8FF88;
+  --card:#121211;
+  --card-2:#0e0e0d;
+  --line:rgba(255,255,255,0.10);
+  --line-strong:rgba(255,255,255,0.28);
+  --display:'Helvetica Neue',Helvetica,Arial,sans-serif;
+  --ultra:'Gotham Ultra','Anton','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --ease:cubic-bezier(0.625,0.05,0,1);
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--bg);color:var(--text);font-family:var(--display);font-weight:500;-webkit-font-smoothing:antialiased;letter-spacing:-0.005em;min-height:100%;}
+body{position:relative;overflow-x:hidden;min-height:100vh;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+img,svg{display:block;max-width:100%;}
+
+/* ===== ambient: quiet, no neon ===== */
+.scan-aura{
+  position:fixed; left:50%; top:0; width:140vw; height:80vh;
+  transform:translateX(-50%);
+  background:radial-gradient(120% 80% at 50% -10%, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.012) 32%, transparent 60%);
+  pointer-events:none; z-index:0;
+}
+.bg-wordmark{
+  position:fixed; left:50%; bottom:-5vh; transform:translateX(-50%);
+  font-family:var(--ultra); font-size:42vw; line-height:.8; letter-spacing:-.04em;
+  color:#fff; opacity:.022; white-space:nowrap; pointer-events:none; user-select:none; z-index:0;
+}
+.scan-grain{
+  position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ===== header ===== */
+.scan-header{ position:relative; z-index:6; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding:30px 40px; }
+.scan-back{display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:500;color:var(--cream);width:max-content;transition:opacity .25s,transform .25s;}
+.scan-back svg{width:18px;height:18px;transition:transform .25s;}
+.scan-back:hover{opacity:.6;}
+.scan-back:hover svg{transform:translateX(-4px);}
+.scan-logo{justify-self:center;}
+.scan-logo img{height:38px;width:auto;}
+.scan-header__spacer{justify-self:end;}
+
+/* ===== stage ===== */
+.scan-stage{ position:relative; z-index:5; display:flex; align-items:flex-start; justify-content:center; padding:1vh 24px 8vh; min-height:calc(100vh - 100px); }
+.scan-shell{ width:100%; max-width:720px; }
+
+/* ===== progress ===== */
+.scan-progress{ margin:6px 0 34px; }
+.scan-progress__top{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px; }
+.scan-progress__label{ font-size:12px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--cream); }
+.scan-progress__pct{ font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); }
+.scan-segs{ display:flex; gap:7px; }
+.scan-seg{ position:relative; flex:1; height:3px; border-radius:999px; background:rgba(255,255,255,.10); overflow:hidden; }
+.scan-seg::after{ content:''; position:absolute; inset:0 100% 0 0; background:var(--cream); border-radius:999px; transition:right .55s var(--ease); }
+.scan-seg.is-done::after{ right:0; }
+.scan-seg.is-current::after{ right:0; }
+
+/* ===== step ===== */
+.scan-card{ position:relative; }
+.scan-step{ display:none; }
+.scan-step.is-active{ display:block; }
+.scan-step.is-active .scan-q,
+.scan-step.is-active .scan-sub,
+.scan-step.is-active .scan-cards,
+.scan-step.is-active .scan-foot,
+.scan-step.is-active .scan-form,
+.scan-step.is-active .scan-summary,
+.scan-step.is-active .scan-note,
+.scan-step.is-active .scan-cta-line,
+.scan-step.is-active .scan-lede{ animation:rise .65s var(--ease-out) both; }
+.scan-step.is-active .scan-sub{ animation-delay:.05s; }
+.scan-step.is-active .scan-cards{ animation-delay:.08s; }
+.scan-step.is-active .scan-foot{ animation-delay:.16s; }
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.scan-eyebrow{ display:inline-flex; align-items:center; gap:9px; font-size:11px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--text-dim); margin-bottom:18px; }
+.scan-eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--yellow); flex:none; }
+.scan-q{ font-family:var(--ultra); font-weight:900; font-size:clamp(30px,4.6vw,54px); line-height:1.0; letter-spacing:-.018em; text-transform:uppercase; color:var(--cream); text-wrap:balance; }
+.scan-sub{ margin-top:16px; font-size:16px; line-height:1.5; color:var(--text-dim); max-width:520px; }
+
+/* ===== option cards ===== */
+.scan-cards{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:30px; }
+.scan-opt{
+  position:relative; overflow:hidden;
+  display:flex; align-items:center; gap:15px;
+  padding:21px 22px; min-height:74px;
+  text-align:left; border-radius:14px;
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--cream); font-size:16px; font-weight:500; line-height:1.18;
+  transition:border-color .3s var(--ease), transform .3s var(--ease-out), box-shadow .3s var(--ease), background .3s var(--ease);
+  opacity:0; transform:translateY(14px);
+}
+.scan-step.is-active .scan-opt{ animation:cardIn .55s var(--ease-out) forwards; animation-delay:calc(.1s + var(--i,0)*.045s); }
+@keyframes cardIn{to{opacity:1;transform:translateY(0)}}
+.scan-opt__idx{ flex:none; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; font-family:var(--ultra); font-size:11px; color:var(--text-dim); background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); transition:all .3s var(--ease); }
+.scan-opt__label{ flex:1; }
+.scan-opt__check{ flex:none; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; border:1px solid rgba(255,255,255,.22); transition:all .3s var(--ease-out); transform:scale(.7); opacity:0; }
+.scan-opt__check svg{ width:12px; height:12px; color:#0a0a0a; }
+.scan-opt::before{ content:''; position:absolute; top:0; left:-60%; width:42%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.06),transparent); transform:skewX(-18deg); pointer-events:none; opacity:0; }
+.scan-opt:hover{ border-color:var(--line-strong); transform:translateY(-2px); box-shadow:0 12px 30px rgba(0,0,0,.35); }
+.scan-opt:hover::before{ opacity:1; animation:sheen .85s var(--ease-out); }
+@keyframes sheen{from{left:-60%}to{left:135%}}
+.scan-opt.is-sel{ border-color:var(--cream); background:var(--cream); color:#0a0a0a; }
+.scan-opt.is-sel .scan-opt__idx{ background:rgba(10,10,10,.08); color:#0a0a0a; border-color:rgba(10,10,10,.14); }
+.scan-opt.is-sel .scan-opt__check{ background:#0a0a0a; border-color:#0a0a0a; transform:scale(1); opacity:1; }
+.scan-opt.is-sel .scan-opt__check svg{ color:var(--cream); }
+.scan-opt.is-sel:hover{ background:#fff; border-color:#fff; transform:translateY(-2px); box-shadow:0 12px 30px rgba(0,0,0,.35); }
+.scan-opt.pop{ animation:pop .4s var(--ease-out); }
+@keyframes pop{0%{transform:scale(1)}42%{transform:scale(1.025)}100%{transform:scale(1)}}
+
+/* ===== value slider (step 4) ===== */
+.scan-slider{ margin-top:32px; }
+.scan-slider__value{ font-family:var(--ultra); font-weight:900; font-size:clamp(44px,7vw,76px); line-height:.95; letter-spacing:-.022em; color:var(--cream); }
+.scan-range{
+  -webkit-appearance:none; appearance:none; width:100%; height:6px; margin-top:34px;
+  border-radius:999px; outline:none; cursor:pointer; --p:33%;
+  background:linear-gradient(90deg, var(--cream) 0, var(--cream) var(--p), rgba(255,255,255,.12) var(--p), rgba(255,255,255,.12) 100%);
+}
+.scan-range::-webkit-slider-thumb{ -webkit-appearance:none; width:30px; height:30px; border-radius:50%; background:var(--cream); border:3px solid #0a0a0a; box-shadow:0 6px 20px rgba(0,0,0,.55); cursor:grab; transition:transform .15s var(--ease-out); }
+.scan-range::-webkit-slider-thumb:active{ transform:scale(1.14); cursor:grabbing; }
+.scan-range::-moz-range-thumb{ width:30px; height:30px; border-radius:50%; background:var(--cream); border:3px solid #0a0a0a; box-shadow:0 6px 20px rgba(0,0,0,.55); cursor:grab; }
+.scan-range::-moz-range-track{ height:6px; border-radius:999px; background:transparent; }
+.scan-range:focus-visible{ outline:2px solid var(--cream); outline-offset:6px; }
+.scan-slider__ticks{ display:flex; justify-content:space-between; margin-top:18px; }
+.scan-slider__ticks span{ font-size:13px; font-weight:600; letter-spacing:.03em; color:var(--text-dim); transition:color .25s var(--ease); }
+.scan-slider__ticks span.is-on{ color:var(--cream); }
+
+/* ===== footer nav ===== */
+.scan-foot{ display:flex; align-items:center; justify-content:space-between; gap:18px; margin-top:36px; }
+.scan-foot--end{ justify-content:flex-end; }
+.scan-prev{ display:inline-flex; align-items:center; gap:11px; font-size:15px; font-weight:500; color:var(--text-dim); padding:6px 2px; transition:color .2s,transform .2s; }
+.scan-prev svg{ width:18px; height:18px; transition:transform .2s; }
+.scan-prev:hover{ color:var(--cream); } .scan-prev:hover svg{ transform:translateX(-4px); }
+.scan-count{ font-size:13px; color:var(--text-dim); }
+.scan-count b{ color:var(--cream); font-weight:700; }
+
+.scan-next{
+  position:relative; display:inline-flex; align-items:center; gap:11px;
+  background:var(--cream); color:#0a0a0a;
+  padding:17px 32px; border-radius:999px;
+  font-size:14px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  transition:transform .25s var(--ease-out), box-shadow .25s var(--ease), opacity .25s, background .25s;
+}
+.scan-next svg{ width:17px; height:17px; transition:transform .25s; }
+.scan-next:hover{ transform:translateY(-2px); background:#fff; box-shadow:0 14px 34px rgba(0,0,0,.4); }
+.scan-next:hover svg{ transform:translateX(4px); }
+.scan-next[disabled]{ opacity:.28; cursor:not-allowed; }
+.scan-next[disabled]:hover{ transform:none; box-shadow:none; background:var(--cream); } .scan-next[disabled]:hover svg{ transform:none; }
+
+/* ===== analyzing overlay (editorial ring) ===== */
+.scan-analyze{ position:fixed; inset:0; z-index:30; display:none; align-items:center; justify-content:center; padding:24px; background:rgba(10,10,10,.94); backdrop-filter:blur(10px); }
+.scan-analyze.is-on{ display:flex; animation:fadeIn .45s var(--ease) both; }
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.scan-analyze__inner{ width:100%; max-width:420px; text-align:center; }
+.scan-ring-wrap{ position:relative; width:148px; height:148px; margin:0 auto 36px; }
+.scan-ring{ width:148px; height:148px; transform:rotate(-90deg); }
+.scan-ring__track{ fill:none; stroke:rgba(255,255,255,.12); stroke-width:2; }
+.scan-ring__bar{ fill:none; stroke:var(--cream); stroke-width:2; stroke-linecap:round; transition:stroke-dashoffset .2s linear; }
+.scan-ring__pct{ position:absolute; inset:0; display:grid; place-items:center; font-family:var(--ultra); font-size:30px; color:var(--cream); letter-spacing:.01em; }
+.scan-analyze__status{ font-family:var(--ultra); font-size:clamp(20px,2.6vw,26px); text-transform:uppercase; letter-spacing:.01em; color:var(--cream); min-height:1.2em; }
+.scan-analyze__sub{ margin-top:12px; font-size:14px; color:var(--text-dim); }
+
+/* ===== step 5 summary + form ===== */
+.scan-summary{ margin-top:28px; border-top:1px solid var(--line); padding-top:24px; }
+.scan-summary__list{ list-style:none; display:flex; flex-direction:column; gap:13px; }
+.scan-summary__list li{
+  display:flex; align-items:center; gap:14px;
+  font-family:var(--ultra); font-size:clamp(18px,2.4vw,24px); line-height:1.12; letter-spacing:-.01em;
+  color:var(--cream);
+  opacity:0; transform:translateX(-10px);
+  animation:sumIn .6s var(--ease-out) forwards; animation-delay:calc(.2s + var(--i,0)*.11s);
+}
+@keyframes sumIn{to{opacity:1;transform:translateX(0)}}
+.scan-summary__list li .x{ flex:none; width:24px;height:24px;border-radius:50%; display:grid;place-items:center; border:1px solid rgba(255,255,255,.18); color:var(--text-dim); }
+.scan-summary__list li .x svg{ width:11px;height:11px; }
+.scan-lede{ margin-top:26px; font-size:17px; line-height:1.55; color:var(--cream-2); max-width:560px; text-wrap:pretty; }
+.scan-lede b{ color:var(--cream); font-weight:700; }
+.scan-cta-line{ margin-top:16px; font-size:15px; line-height:1.55; color:var(--text-dim); max-width:560px; }
+.scan-cta-line b{ color:var(--cream); font-weight:700; }
+
+.scan-form{ margin-top:26px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.scan-field{ position:relative; }
+.scan-field--full{ grid-column:1 / -1; }
+.scan-field input{
+  -webkit-appearance:none; appearance:none; width:100%;
+  padding:17px 20px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.02);
+  color:var(--text); font-family:inherit; font-size:16px; font-weight:500;
+  transition:border-color .2s, background .2s;
+}
+.scan-field input::placeholder{ color:rgba(255,255,255,.38); }
+.scan-field input:focus{ outline:none; border-color:var(--cream); background:rgba(255,255,255,.035); }
+.scan-submit{ grid-column:1 / -1; width:100%; justify-content:center; margin-top:4px; padding:19px; }
+.scan-note{ margin-top:18px; font-size:13px; letter-spacing:.04em; text-transform:uppercase; color:var(--text-dim); display:flex; align-items:center; gap:10px; justify-content:center; }
+.scan-note .sep{ width:3px;height:3px;border-radius:50%;background:var(--text-dim); }
+
+/* ===== success ===== */
+.scan-success{ display:none; text-align:center; padding:24px 0; }
+.scan-success.is-active{ display:block; animation:rise .6s var(--ease-out) both; }
+.scan-success__check{ width:78px;height:78px;margin:0 auto 28px;border-radius:50%;background:var(--cream);display:grid;place-items:center;animation:checkIn .55s var(--ease-out) both; }
+@keyframes checkIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.scan-success__check svg{ width:36px;height:36px;color:#0a0a0a; }
+.scan-success__title{ font-family:var(--ultra);font-weight:900;font-size:clamp(30px,4.4vw,50px);line-height:1.0;letter-spacing:-.018em;text-transform:uppercase;color:var(--cream); }
+.scan-success__text{ margin:18px auto 0;max-width:460px;font-size:16px;line-height:1.55;color:var(--text-dim); }
+.scan-success__text b{ color:var(--cream); font-weight:600; }
+.scan-success .scan-next{ margin:32px auto 0; }
+
+@media (max-width:680px){
+  .scan-header{ padding:20px; }
+  .scan-back span{ display:none; }
+  .scan-logo img{ height:32px; }
+  .scan-stage{ padding:0 16px 12vh; min-height:calc(100vh - 80px); align-items:flex-start; }
+  .scan-cards{ grid-template-columns:1fr; gap:10px; }
+  .scan-opt{ min-height:60px; padding:17px 18px; }
+  .scan-slider__value{ font-size:clamp(40px,13vw,56px); }
+  .scan-form{ grid-template-columns:1fr; }
+  /* app-style sticky bottom action bar */
+  .scan-foot{
+    position:sticky; bottom:0; z-index:8; gap:12px; margin-top:26px;
+    padding:14px 0 calc(16px + env(safe-area-inset-bottom));
+    background:linear-gradient(to top, var(--bg) 62%, rgba(10,10,10,0) 100%);
+  }
+  .scan-foot .scan-next{ flex:1; justify-content:center; padding:17px 22px; }
+  .scan-foot--end{ justify-content:flex-end; }
+  .scan-count{ display:none; }
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.08s !important;}
+  .scan-opt{opacity:1;transform:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="scan-aura" aria-hidden="true"></div>
+<div class="bg-wordmark" aria-hidden="true">BOOST</div>
+<div class="scan-grain" aria-hidden="true"></div>
+
+<header class="scan-header">
+  <a class="scan-back" id="backHome" href="index.html" aria-label="Terug naar home">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Terug naar home</span>
+  </a>
+  <a class="scan-logo" id="logoHome" href="index.html" aria-label="Mr Boost — home">
+    <img src="data:image/svg+xml;utf8,%3Csvg%20id%3D%22Group_48868%22%20data-name%3D%22Group%2048868%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22347.402%22%20height%3D%22165.429%22%20viewBox%3D%220%200%20347.402%20165.429%22%3E%0A%20%20%3Cpath%20id%3D%22Path_874%22%20data-name%3D%22Path%20874%22%20d%3D%22M762.1%2C275.1%22%20transform%3D%22translate(-582.166%20-210.346)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_859%22%20data-name%3D%22Path%20859%22%20d%3D%22M55.692%2C387.9a21.765%2C21.765%2C0%2C0%2C0-8.093-2.035%2C50.929%2C50.929%2C0%2C0%2C0-12.631.912L6.081%2C391.857%2C0%2C459.923l35.226-6.175a58.414%2C58.414%2C0%2C0%2C0%2C14.128-4.07%2C28.536%2C28.536%2C0%2C0%2C0%2C8.842-5.895%2C16.577%2C16.577%2C0%2C0%2C0%2C4.234-7.111%2C17.8%2C17.8%2C0%2C0%2C0%2C.351-7.859%2C11.817%2C11.817%2C0%2C0%2C0-4.234-7.508%2C14.9%2C14.9%2C0%2C0%2C0-8.163-3.088l-2.9-.234%2C2.643-1.193c4.748-2.152%2C8.163-4.982%2C10.151-8.444a15.962%2C15.962%2C0%2C0%2C0%2C1.988-10.97%2C15.335%2C15.335%2C0%2C0%2C0-2.058-5.427A10.819%2C10.819%2C0%2C0%2C0%2C55.692%2C387.9ZM39.787%2C435.363a11.878%2C11.878%2C0%2C0%2C1-6.479%2C2.947l-11.7%2C2.058%2C1.076-11.906%2C10.175-1.778c5.216-.912%2C8.163.281%2C8.725%2C3.555A5.686%2C5.686%2C0%2C0%2C1%2C39.787%2C435.363Zm1.707-24.607c-1.263%2C1.45-3.368%2C2.433-6.432%2C2.97l-11.227%2C1.965.982-11.3%2C9.8-1.73a11.892%2C11.892%2C0%2C0%2C1%2C5.754.023%2C4.033%2C4.033%2C0%2C0%2C1%2C2.643%2C3.3A5.623%2C5.623%2C0%2C0%2C1%2C41.494%2C410.757Z%22%20transform%3D%22translate(0%20-294.494)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_866%22%20data-name%3D%22Path%20866%22%20d%3D%22M352.019%2C337.119a31.707%2C31.707%2C0%2C0%2C0-11.3-4.421%2C37%2C37%2C0%2C0%2C0-13.519.024%2C38.075%2C38.075%2C0%2C0%2C0-14.689%2C5.777%2C39.32%2C39.32%2C0%2C0%2C0-10.689%2C10.572%2C40.675%2C40.675%2C0%2C0%2C0-5.918%2C13.684%2C37.211%2C37.211%2C0%2C0%2C0-.4%2C14.993%2C29.188%2C29.188%2C0%2C0%2C0%2C4.374%2C11.157%2C27.944%2C27.944%2C0%2C0%2C0%2C8.257%2C8.14%2C31.714%2C31.714%2C0%2C0%2C0%2C11.3%2C4.421%2C37%2C37%2C0%2C0%2C0%2C13.52-.023%2C38.085%2C38.085%2C0%2C0%2C0%2C14.689-5.778%2C39.322%2C39.322%2C0%2C0%2C0%2C10.689-10.573%2C40.662%2C40.662%2C0%2C0%2C0%2C5.918-13.683%2C37.207%2C37.207%2C0%2C0%2C0%2C.4-14.993%2C28.854%2C28.854%2C0%2C0%2C0-4.4-11.157A28.148%2C28.148%2C0%2C0%2C0%2C352.019%2C337.119Zm-7.859%2C31.67a19.692%2C19.692%2C0%2C0%2C1-2.2%2C6.385%2C17.532%2C17.532%2C0%2C0%2C1-4.28%2C5.1%2C13.6%2C13.6%2C0%2C0%2C1-6.386%2C2.83%2C14.928%2C14.928%2C0%2C0%2C1-5.777-.023%2C11.285%2C11.285%2C0%2C0%2C1-4.561-2.152%2C12.715%2C12.715%2C0%2C0%2C1-3.2-3.813A15.822%2C15.822%2C0%2C0%2C1%2C316%2C372.088a20.2%2C20.2%2C0%2C0%2C1%2C0-6.713%2C19.158%2C19.158%2C0%2C0%2C1%2C2.2-6.386%2C17.235%2C17.235%2C0%2C0%2C1%2C4.28-5.1%2C13.594%2C13.594%2C0%2C0%2C1%2C6.386-2.83%2C15.184%2C15.184%2C0%2C0%2C1%2C5.731.023%2C11.4%2C11.4%2C0%2C0%2C1%2C4.632%2C2.128%2C12.727%2C12.727%2C0%2C0%2C1%2C3.2%2C3.813%2C15.832%2C15.832%2C0%2C0%2C1%2C1.754%2C5.029A21%2C21%2C0%2C0%2C1%2C344.16%2C368.79Z%22%20transform%3D%22translate(-225.13%20-253.37)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_872%22%20data-name%3D%22Path%20872%22%20d%3D%22M683.176%2C288.759a27.941%2C27.941%2C0%2C0%2C0-8.257-8.14%2C31.884%2C31.884%2C0%2C0%2C0-11.3-4.421%2C37%2C37%2C0%2C0%2C0-13.52.023A38.083%2C38.083%2C0%2C0%2C0%2C635.413%2C282a39.314%2C39.314%2C0%2C0%2C0-10.689%2C10.573%2C40.671%2C40.671%2C0%2C0%2C0-5.918%2C13.683%2C37.219%2C37.219%2C0%2C0%2C0-.4%2C14.993%2C29.2%2C29.2%2C0%2C0%2C0%2C4.374%2C11.157%2C27.949%2C27.949%2C0%2C0%2C0%2C8.257%2C8.14%2C31.713%2C31.713%2C0%2C0%2C0%2C11.3%2C4.421%2C36.986%2C36.986%2C0%2C0%2C0%2C13.52-.023%2C38.081%2C38.081%2C0%2C0%2C0%2C14.689-5.778%2C38.983%2C38.983%2C0%2C0%2C0%2C10.689-10.572%2C40.66%2C40.66%2C0%2C0%2C0%2C5.918-13.684%2C37.213%2C37.213%2C0%2C0%2C0%2C.4-14.993A29.333%2C29.333%2C0%2C0%2C0%2C683.176%2C288.759Zm-16.116%2C23.53h0a19.681%2C19.681%2C0%2C0%2C1-2.2%2C6.386%2C17.54%2C17.54%2C0%2C0%2C1-4.28%2C5.1%2C13.6%2C13.6%2C0%2C0%2C1-6.386%2C2.83%2C14.928%2C14.928%2C0%2C0%2C1-5.777-.023%2C11.279%2C11.279%2C0%2C0%2C1-4.561-2.152%2C12.714%2C12.714%2C0%2C0%2C1-3.2-3.812%2C15.833%2C15.833%2C0%2C0%2C1-1.755-5.029%2C20.221%2C20.221%2C0%2C0%2C1%2C0-6.713%2C19.167%2C19.167%2C0%2C0%2C1%2C2.2-6.385%2C17.23%2C17.23%2C0%2C0%2C1%2C4.281-5.1%2C13.6%2C13.6%2C0%2C0%2C1%2C6.386-2.83%2C15.18%2C15.18%2C0%2C0%2C1%2C5.73.023%2C11.4%2C11.4%2C0%2C0%2C1%2C4.631%2C2.128%2C12.719%2C12.719%2C0%2C0%2C1%2C3.2%2C3.813%2C15.83%2C15.83%2C0%2C0%2C1%2C1.754%2C5.029A21%2C21%2C0%2C0%2C1%2C667.06%2C312.289Z%22%20transform%3D%22translate(-471.611%20-210.415)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_876%22%20data-name%3D%22Path%20876%22%20d%3D%22M980.225%2C251.208a25.033%2C25.033%2C0%2C0%2C0-6.34-2.83c-2.432-.725-5.192-1.38-8.21-1.965-2.409-.421-4.374-.8-5.871-1.076-1.5-.3-2.689-.585-3.531-.842a4.7%2C4.7%2C0%2C0%2C1-2.012-1.006%2C2.959%2C2.959%2C0%2C0%2C1-.819-1.637%2C2.886%2C2.886%2C0%2C0%2C1%2C1.287-3.017h0a9.453%2C9.453%2C0%2C0%2C1%2C3.719-1.357%2C27.093%2C27.093%2C0%2C0%2C1%2C11.04.374%2C40.762%2C40.762%2C0%2C0%2C1%2C9.286%2C3.415l9.332-16.139a40.629%2C40.629%2C0%2C0%2C0-13.426-4.561%2C50.77%2C50.77%2C0%2C0%2C0-16.794.234%2C38.411%2C38.411%2C0%2C0%2C0-11.789%2C3.929%2C29.557%2C29.557%2C0%2C0%2C0-8.327%2C6.479%2C21.93%2C21.93%2C0%2C0%2C0-4.584%2C8.14%2C19.592%2C19.592%2C0%2C0%2C0-.538%2C9.1%2C16.732%2C16.732%2C0%2C0%2C0%2C2.105%2C5.941%2C13.768%2C13.768%2C0%2C0%2C0%2C3.976%2C4.093%2C22.9%2C22.9%2C0%2C0%2C0%2C6.128%2C2.854%2C74.236%2C74.236%2C0%2C0%2C0%2C8.584%2C2.035c2.574.468%2C4.654.889%2C6.222%2C1.216%2C1.614.351%2C2.807.678%2C3.672.959a4.149%2C4.149%2C0%2C0%2C1%2C2.035%2C1.216%2C3.693%2C3.693%2C0%2C0%2C1%2C.726%2C1.661%2C3.207%2C3.207%2C0%2C0%2C1-1.217%2C3.134%2C7.877%2C7.877%2C0%2C0%2C1-3.742%2C1.544%2C31.058%2C31.058%2C0%2C0%2C1-11.7-.351%2C42.391%2C42.391%2C0%2C0%2C1-12.21-4.842L927.9%2C284.048a46.363%2C46.363%2C0%2C0%2C0%2C15.11%2C5.777%2C49.869%2C49.869%2C0%2C0%2C0%2C18.642.07%2C40.56%2C40.56%2C0%2C0%2C0%2C12.186-4%2C28.493%2C28.493%2C0%2C0%2C0%2C8.35-6.526%2C21.056%2C21.056%2C0%2C0%2C0%2C4.8-17.706%2C16.061%2C16.061%2C0%2C0%2C0-2.339-6.175A15.435%2C15.435%2C0%2C0%2C0%2C980.225%2C251.208Z%22%20transform%3D%22translate(-708.388%20-167.952)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Path_878%22%20data-name%3D%22Path%20878%22%20d%3D%22M1210.314%2C163.779l-1.615%2C18.127%2C19.577-3.415-4.489%2C49.938%2C20.7-3.626%2C4.468-49.938%2C19.577-3.415%2C1.614-18.151Z%22%20transform%3D%22translate(-922.745%20-117.026)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%20%20%3Cpath%20id%3D%22Union_1%22%20data-name%3D%22Union%201%22%20d%3D%22M5.847%2C21.472l35.366-6.2L76.346%2C9.145%2C128.575%2C0l-5.847%2C65.842-35.366%2C6.2L52.23%2C78.193%2C0%2C87.34Zm18.688%2C8.279L20.818%2C71.339l12.348-2.151%2C1.966-22.151%2C8.419%2C14.246L54.991%2C43.341%2C53%2C65.7l12.585-2.2%2C3.719-41.588L55.223%2C24.372%2C44.886%2C41.353l-7.6-13.824ZM90.17%2C18.29%2C74.662%2C21%2C70.943%2C62.591%2C83.6%2C60.37l1.1-12.164%2C4.023-.7%2C6.549%2C10.807L108.9%2C55.9%2C101%2C43.529l.444-.235a19.216%2C19.216%2C0%2C0%2C0%2C4.631-3.2%2C13.659%2C13.659%2C0%2C0%2C0%2C2.83-3.79%2C12.273%2C12.273%2C0%2C0%2C0%2C1.264-4.233%2C16.273%2C16.273%2C0%2C0%2C0-.117-4.516%2C14.214%2C14.214%2C0%2C0%2C0-1.52-4.327%2C9.941%2C9.941%2C0%2C0%2C0-2.971-3.275%2C13.434%2C13.434%2C0%2C0%2C0-6.036-2.128%2C21.99%2C21.99%2C0%2C0%2C0-2.819-.17A37.873%2C37.873%2C0%2C0%2C0%2C90.17%2C18.29ZM86.287%2C29.728l5.168-.912c2.059-.35%2C3.533-.187%2C4.562.539a3.468%2C3.468%2C0%2C0%2C1%2C1.426%2C2.315%2C4.61%2C4.61%2C0%2C0%2C1-1.285%2C3.977%2C8.859%2C8.859%2C0%2C0%2C1-5.193%2C2.409l-5.52.958Z%22%20transform%3D%22translate(6.713%200)%22%20fill%3D%22%23ececec%22%3E%3C%2Fpath%3E%0A%3C%2Fsvg%3E" alt="MR BOOST" />
+  </a>
+  <div class="scan-header__spacer"></div>
+</header>
+
+<main class="scan-stage">
+  <div class="scan-shell">
+
+    <div class="scan-progress" id="progressRow">
+      <div class="scan-progress__top">
+        <span class="scan-progress__label" id="stepLabel">Stap 1/5</span>
+        <span class="scan-progress__pct" id="stepPct">20%</span>
+      </div>
+      <div class="scan-segs" id="segs">
+        <div class="scan-seg"></div><div class="scan-seg"></div><div class="scan-seg"></div><div class="scan-seg"></div><div class="scan-seg"></div>
+      </div>
+    </div>
+
+    <div class="scan-card">
+
+      <!-- STEP 1 -->
+      <section class="scan-step is-active" data-step="1" data-mood="positive">
+        <span class="scan-eyebrow"><span class="dot"></span>Brand scan</span>
+        <h1 class="scan-q">Wat herken je<br />het meest?</h1>
+        <p class="scan-sub">Veel merken lopen vast zonder het door te hebben. Kies alles wat voelt als jullie.</p>
+        <div class="scan-cards" data-multi="recognise">
+          <button type="button" class="scan-opt" style="--i:0"><span class="scan-opt__idx">01</span><span class="scan-opt__label">AI chaos</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:1"><span class="scan-opt__idx">02</span><span class="scan-opt__label">Zwakke branding</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:2"><span class="scan-opt__idx">03</span><span class="scan-opt__label">Te weinig omzet</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:3"><span class="scan-opt__idx">04</span><span class="scan-opt__label">Te weinig aandacht</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:4"><span class="scan-opt__idx">05</span><span class="scan-opt__label">Geen duidelijke richting</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:5"><span class="scan-opt__idx">06</span><span class="scan-opt__label">Meer potentieel dan resultaat</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+        </div>
+        <div class="scan-foot scan-foot--end">
+          <span class="scan-count" data-count></span>
+          <button type="button" class="scan-next" data-next disabled>Volgende
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 2 -->
+      <section class="scan-step" data-step="2" data-mood="positive">
+        <span class="scan-eyebrow"><span class="dot"></span>Ambitie</span>
+        <h1 class="scan-q">Waar wil je<br />naartoe?</h1>
+        <p class="scan-sub">Goede branding creëert momentum. Kies waar het naartoe mag.</p>
+        <div class="scan-cards" data-multi="ambition">
+          <button type="button" class="scan-opt" style="--i:0"><span class="scan-opt__idx">01</span><span class="scan-opt__label">Meer omzet</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:1"><span class="scan-opt__idx">02</span><span class="scan-opt__label">Meer aandacht</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:2"><span class="scan-opt__idx">03</span><span class="scan-opt__label">Premium klanten</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:3"><span class="scan-opt__idx">04</span><span class="scan-opt__label">Sterker merk</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:4"><span class="scan-opt__idx">05</span><span class="scan-opt__label">Viral gaan</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:5"><span class="scan-opt__idx">06</span><span class="scan-opt__label">Marktleider worden</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+        </div>
+        <div class="scan-foot">
+          <button type="button" class="scan-prev" data-prev><svg viewBox="0 0 24 24" fill="none"><path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Terug</button>
+          <button type="button" class="scan-next" data-next disabled>Volgende
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 3 -->
+      <section class="scan-step" data-step="3" data-mood="tension">
+        <span class="scan-eyebrow"><span class="dot"></span>Realiteit</span>
+        <h1 class="scan-q">Wat gebeurt er als<br />je niks verandert?</h1>
+        <p class="scan-sub">Stil blijven staan kost vaak meer dan je denkt.</p>
+        <div class="scan-cards" data-multi="risk">
+          <button type="button" class="scan-opt" style="--i:0"><span class="scan-opt__idx">01</span><span class="scan-opt__label">Omzet mislopen</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:1"><span class="scan-opt__idx">02</span><span class="scan-opt__label">Concurrenten groeien harder</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:2"><span class="scan-opt__idx">03</span><span class="scan-opt__label">Onzichtbaar blijven</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:3"><span class="scan-opt__idx">04</span><span class="scan-opt__label">Achterlopen op AI</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:4"><span class="scan-opt__idx">05</span><span class="scan-opt__label">Middelmatige content</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          <button type="button" class="scan-opt" style="--i:5"><span class="scan-opt__idx">06</span><span class="scan-opt__label">Geen groei</span><span class="scan-opt__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+        </div>
+        <div class="scan-foot">
+          <button type="button" class="scan-prev" data-prev><svg viewBox="0 0 24 24" fill="none"><path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Terug</button>
+          <button type="button" class="scan-next" data-next disabled>Volgende
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 4 -->
+      <section class="scan-step" data-step="4" data-mood="positive">
+        <span class="scan-eyebrow"><span class="dot"></span>Waarde</span>
+        <h1 class="scan-q" id="q4">Wat is het je waard om dit te voorkomen?</h1>
+        <p class="scan-sub">Groeien vraagt niet alleen om ambitie, maar ook om actie.</p>
+        <div class="scan-slider" data-single="value">
+          <div class="scan-slider__value" id="valueLabel">€10K – €25K</div>
+          <input type="range" min="0" max="3" step="1" value="1" id="valueRange" class="scan-range" aria-label="Wat is het je waard" />
+          <div class="scan-slider__ticks" id="valueTicks">
+            <span>€5–10K</span><span>€10–25K</span><span>€25–50K</span><span>€50K+</span>
+          </div>
+        </div>
+        <div class="scan-foot">
+          <button type="button" class="scan-prev" data-prev><svg viewBox="0 0 24 24" fill="none"><path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Terug</button>
+          <button type="button" class="scan-next" data-analyze disabled>Analyseer mijn merk
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 5 -->
+      <section class="scan-step" data-step="5" data-mood="positive">
+        <span class="scan-eyebrow"><span class="dot"></span>Jouw Boost-diagnose</span>
+        <h1 class="scan-q">Oké, dus je<br />wilt niet…</h1>
+        <div class="scan-summary">
+          <ul class="scan-summary__list" id="summaryList"></ul>
+        </div>
+        <p class="scan-lede">Je ziet dat er <b>meer potentieel</b> in jullie merk zit, maar dat richting, aandacht en strategie momenteel groei tegenhouden.</p>
+        <p class="scan-cta-line">Laat je gegevens achter en <b>Dennis</b> neemt contact met je op om samen te kijken hoe jullie weer momentum kunnen creëren.</p>
+        <form class="scan-form" id="scanForm" novalidate>
+          <div class="scan-field"><input type="text" name="name" placeholder="Naam" required /></div>
+          <div class="scan-field"><input type="text" name="company" placeholder="Bedrijfsnaam" required /></div>
+          <div class="scan-field"><input type="email" name="email" placeholder="E-mailadres" required /></div>
+          <div class="scan-field"><input type="tel" name="phone" placeholder="Telefoonnummer" required /></div>
+          <button type="submit" class="scan-next scan-submit">Plan mijn Boost sessie
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </form>
+        <p class="scan-note">Vrijblijvend <span class="sep"></span> 30 minuten</p>
+        <div class="scan-foot" style="margin-top:22px;">
+          <button type="button" class="scan-prev" data-prev><svg viewBox="0 0 24 24" fill="none"><path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Terug</button>
+        </div>
+      </section>
+
+      <!-- SUCCESS -->
+      <section class="scan-success" data-step="success">
+        <div class="scan-success__check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h1 class="scan-success__title">Je sessie<br />is aangevraagd</h1>
+        <p class="scan-success__text">Top, <b id="successName">je aanvraag staat klaar</b>. Dennis neemt binnen 1 werkdag persoonlijk contact op om samen het momentum terug te brengen in jullie merk.</p>
+        <a class="scan-next" id="successHome" href="index.html">Terug naar home
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<!-- ANALYZING OVERLAY -->
+<div class="scan-analyze" id="analyze" aria-hidden="true">
+  <div class="scan-analyze__inner">
+    <div class="scan-ring-wrap">
+      <svg class="scan-ring" viewBox="0 0 148 148" aria-hidden="true">
+        <circle class="scan-ring__track" cx="74" cy="74" r="70"></circle>
+        <circle class="scan-ring__bar" id="analyzeBar" cx="74" cy="74" r="70"></circle>
+      </svg>
+      <div class="scan-ring__pct" id="analyzePct">0%</div>
+    </div>
+    <div class="scan-analyze__status" id="analyzeStatus">Merk-signalen verzamelen…</div>
+    <p class="scan-analyze__sub">Je persoonlijke Boost-diagnose wordt samengesteld.</p>
+  </div>
+</div>
+
+<!-- ====== BOOST CRM CONFIG — plak hier je Google Apps Script URL (zie boost-crm-setup.md). Leeg = lokale modus. ====== -->
+<script>window.BOOST_CONFIG = { endpoint: "" };</script>
+<script>
+(function(){
+  'use strict';
+  var TOTAL = 5;
+  var STORE = 'boostScanV2';
+
+  var steps = [].slice.call(document.querySelectorAll('.scan-step'));
+  var success = document.querySelector('.scan-success');
+  var progressRow = document.getElementById('progressRow');
+  var stepLabel = document.getElementById('stepLabel');
+  var stepPct = document.getElementById('stepPct');
+  var segs = [].slice.call(document.querySelectorAll('#segs .scan-seg'));
+  var body = document.body;
+
+  var state = { step:1, answers:{ recognise:[], ambition:[], risk:[], value:'', name:'', company:'', email:'', phone:'' } };
+  try { var s = JSON.parse(localStorage.getItem(STORE)||'null'); if(s&&s.answers) state = s; } catch(e){}
+
+  /* preserve preview query string */
+  var qs = window.location.search || '';
+  if(qs){ ['backHome','logoHome','successHome'].forEach(function(id){ var el=document.getElementById(id); if(el && el.getAttribute('href').indexOf('?')===-1) el.href = el.getAttribute('href')+qs; }); }
+
+  function persist(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
+
+  /* ---- dynamic copy maps ---- */
+  var Q4 = {
+    'Omzet mislopen':'Wat is het je waard om geen omzet meer mis te lopen?',
+    'Concurrenten groeien harder':'Wat is het je waard om niet ingehaald te worden door concurrenten?',
+    'Onzichtbaar blijven':'Wat is het je waard om niet onzichtbaar te blijven?',
+    'Achterlopen op AI':'Wat is het je waard om niet achter te lopen op AI?',
+    'Middelmatige content':'Wat is het je waard om niet vast te zitten in middelmatige content?',
+    'Geen groei':'Wat is het je waard om niet stil te blijven staan?'
+  };
+  var SUMMARY = {
+    'Omzet mislopen':'…omzet blijven mislopen.',
+    'Concurrenten groeien harder':'…dat concurrenten harder groeien dan jullie.',
+    'Onzichtbaar blijven':'…onzichtbaar blijven voor je ideale klanten.',
+    'Achterlopen op AI':'…achterlopen op AI terwijl andere merken alle aandacht pakken.',
+    'Middelmatige content':'…dat jullie content middelmatig blijft voelen.',
+    'Geen groei':'…stil blijven staan terwijl er meer in zit.'
+  };
+
+  function syncDynamic(){
+    var risks = state.answers.risk || [];
+    var q4 = document.getElementById('q4');
+    if(q4){ q4.textContent = (risks.length && Q4[risks[0]]) ? Q4[risks[0]] : 'Wat is het je waard om dit te voorkomen?'; }
+    var list = document.getElementById('summaryList');
+    if(list){
+      var picks = risks.length ? risks : ['Geen groei'];
+      list.innerHTML = picks.slice(0,4).map(function(r,i){
+        var line = SUMMARY[r] || ('…dat dit zo blijft.');
+        return '<li style="--i:'+i+'"><span class="x"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>'+line+'</li>';
+      }).join('');
+    }
+  }
+
+  /* ---- progress ---- */
+  function paintProgress(n){
+    var isNum = typeof n === 'number';
+    stepLabel.textContent = isNum ? ('Stap '+n+'/'+TOTAL) : ('Klaar');
+    var pct = isNum ? Math.round(n/TOTAL*100) : 100;
+    stepPct.textContent = pct+'%';
+    segs.forEach(function(seg,i){
+      seg.classList.toggle('is-done', isNum ? (i < n-1) : true);
+      seg.classList.toggle('is-current', isNum && i === n-1);
+    });
+  }
+
+  /* ---- step engine ---- */
+  function setMood(){ /* mood is now expressed through copy, not colour */ }
+  function showStep(n, opts){
+    opts = opts||{};
+    state.step = n;
+    var isSuccess = n === 'success';
+    steps.forEach(function(s){ s.classList.toggle('is-active', s.getAttribute('data-step')==String(n)); });
+    success.classList.toggle('is-active', isSuccess);
+    progressRow.style.display = isSuccess ? 'none' : 'block';
+    if(isSuccess){ body.setAttribute('data-mood','positive'); paintProgress('done'); }
+    else { setMood(n); paintProgress(n); syncDynamic(); refreshNav(); }
+    persist();
+    if(!opts.noScroll){ try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); } }
+  }
+
+  /* ---- restore selections ---- */
+  function restore(){
+    document.querySelectorAll('.scan-cards[data-multi]').forEach(function(group){
+      var key = group.getAttribute('data-multi');
+      var picked = state.answers[key]||[];
+      group.querySelectorAll('.scan-opt').forEach(function(opt){
+        if(picked.indexOf(label(opt))!==-1) opt.classList.add('is-sel');
+      });
+    });
+    /* value slider position is restored at init */
+    var f = document.getElementById('scanForm');
+    if(f){ ['name','company','email','phone'].forEach(function(k){ if(state.answers[k]) f[k].value = state.answers[k]; }); }
+  }
+  function label(opt){ var l = opt.querySelector('.scan-opt__label'); return (l?l.textContent:opt.textContent).trim(); }
+
+  /* ---- nav enablement + count ---- */
+  function refreshNav(){
+    steps.forEach(function(step){
+      var multi = step.querySelector('.scan-cards[data-multi]');
+      var slider = step.querySelector('[data-single="value"]');
+      var nextBtn = step.querySelector('[data-next],[data-analyze]');
+      if(!nextBtn) return;
+      var ok = true;
+      if(multi){ ok = state.answers[multi.getAttribute('data-multi')].length > 0; }
+      if(slider){ ok = !!state.answers.value; }
+      nextBtn.disabled = !ok;
+      var counter = step.querySelector('[data-count]');
+      if(counter && multi){ var c = state.answers[multi.getAttribute('data-multi')].length; counter.innerHTML = c ? ('<b>'+c+'</b> gekozen') : ''; }
+    });
+  }
+
+  /* ---- multi-select ---- */
+  document.querySelectorAll('.scan-cards[data-multi]').forEach(function(group){
+    var key = group.getAttribute('data-multi');
+    group.addEventListener('click', function(e){
+      var opt = e.target.closest('.scan-opt'); if(!opt) return;
+      opt.classList.toggle('is-sel');
+      opt.classList.remove('pop'); void opt.offsetWidth; opt.classList.add('pop');
+      var picked = []; group.querySelectorAll('.scan-opt.is-sel').forEach(function(o){ picked.push(label(o)); });
+      state.answers[key] = picked; persist(); refreshNav(); syncDynamic();
+    });
+  });
+
+  /* ---- value slider ---- */
+  var VALUES = ['€5K – €10K','€10K – €25K','€25K – €50K','€50K+'];
+  var range = document.getElementById('valueRange');
+  var valueLabel = document.getElementById('valueLabel');
+  var valueTicks = document.querySelectorAll('#valueTicks span');
+  function paintSlider(i){
+    if(range) range.style.setProperty('--p',(i/3*100)+'%');
+    if(valueLabel) valueLabel.textContent = VALUES[i];
+    valueTicks.forEach(function(t,ti){ t.classList.toggle('is-on', ti===i); });
+  }
+  if(range){
+    range.addEventListener('input', function(){
+      var i = parseInt(range.value,10) || 0;
+      state.answers.value = VALUES[i]; persist(); paintSlider(i); refreshNav();
+    });
+  }
+
+  /* ---- nav buttons ---- */
+  document.querySelectorAll('[data-next]').forEach(function(b){ b.addEventListener('click', function(){ if(typeof state.step==='number' && state.step<TOTAL) showStep(state.step+1); }); });
+  document.querySelectorAll('[data-prev]').forEach(function(b){ b.addEventListener('click', function(){ if(typeof state.step==='number' && state.step>1) showStep(state.step-1); }); });
+
+  /* ---- analyzing moment (step 4 -> 5) ---- */
+  var analyze = document.getElementById('analyze');
+  var aPct = document.getElementById('analyzePct');
+  var aBar = document.getElementById('analyzeBar');
+  var aStatus = document.getElementById('analyzeStatus');
+  var RING_C = 2 * Math.PI * 70;
+  if(aBar){ aBar.style.strokeDasharray = RING_C; aBar.style.strokeDashoffset = RING_C; }
+  var STATUSES = ['Merk-signalen verzamelen…','Positionering analyseren…','Aandacht & momentum meten…','Groeikansen berekenen…','Diagnose samenstellen…'];
+  document.querySelectorAll('[data-analyze]').forEach(function(b){
+    b.addEventListener('click', function(){ runAnalyze(); });
+  });
+  function runAnalyze(){
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    syncDynamic();
+    if(reduce){ showStep(5); return; }
+    analyze.classList.add('is-on'); analyze.setAttribute('aria-hidden','false');
+    var dur = 2100, t0 = performance.now();
+    if(aBar) aBar.style.strokeDashoffset = RING_C;
+    function frame(now){
+      var p = Math.min(1,(now-t0)/dur);
+      var eased = p<.5 ? 2*p*p : 1-Math.pow(-2*p+2,2)/2;
+      var pct = Math.round(eased*100);
+      aPct.textContent = pct+'%'; if(aBar) aBar.style.strokeDashoffset = RING_C*(1-eased);
+      var si = Math.min(STATUSES.length-1, Math.floor(p*STATUSES.length));
+      if(aStatus.textContent !== STATUSES[si]) aStatus.textContent = STATUSES[si];
+      if(p<1){ requestAnimationFrame(frame); }
+      else { setTimeout(function(){ analyze.classList.remove('is-on'); analyze.setAttribute('aria-hidden','true'); showStep(5); }, 240); }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ---- form submit ---- */
+  var form = document.getElementById('scanForm');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!form.reportValidity()) return;
+    state.answers.name = form.name.value; state.answers.company = form.company.value;
+    state.answers.email = form.email.value; state.answers.phone = form.phone.value;
+    persist();
+    /* ---- store lead for the CRM (/bh33r) ---- */
+    try {
+      var lead = {
+        id: 'L' + Date.now().toString(36).toUpperCase(),
+        ts: Date.now(),
+        name: state.answers.name || '',
+        company: state.answers.company || '',
+        email: state.answers.email || '',
+        phone: state.answers.phone || '',
+        recognise: (state.answers.recognise || []).slice(),
+        ambition: (state.answers.ambition || []).slice(),
+        risk: (state.answers.risk || []).slice(),
+        value: state.answers.value || '',
+        status: 'new'
+      };
+      var leads = JSON.parse(localStorage.getItem('boostLeads') || '[]');
+      leads.unshift(lead);
+      localStorage.setItem('boostLeads', JSON.stringify(leads));
+      /* send to the central CRM backend if configured (see boost-config.js) */
+      try {
+        var cfg = window.BOOST_CONFIG || {};
+        if (cfg.endpoint) {
+          fetch(cfg.endpoint, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({ type:'lead', lead: lead }) });
+        }
+      } catch (e2) {}
+    } catch (err) {}
+    var sn = document.getElementById('successName');
+    if(sn && state.answers.name) sn.textContent = state.answers.name;
+    showStep('success');
+  });
+  ['name','company','email','phone'].forEach(function(k){
+    if(form[k]) form[k].addEventListener('input', function(){ state.answers[k]=form[k].value; persist(); });
+  });
+
+  /* ---- init ---- */
+  restore();
+  (function initSlider(){
+    if(!range) return;
+    var vi = VALUES.indexOf(state.answers.value);
+    if(vi < 0){ vi = 1; state.answers.value = VALUES[1]; persist(); }
+    range.value = vi; paintSlider(vi);
+  })();
+  showStep(typeof state.step==='number'?state.step:1, {noScroll:true});
+})();
+</script>
+
+</body>
+</html>

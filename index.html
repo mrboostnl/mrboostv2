@@ -781,6 +781,40 @@ body.is-footer-visible .sp-fab {
 .play-circle__btn svg { width: 14px; height: 14px; margin-left: 2px; }
 .play-label { font-size: 14px; color: #ddd; }
 
+/* MOBILE: video-circle moves to a fixed bottom-right FAB above the progressive blur.
+   The REAL React .play-group stays as an invisible morph-origin at the same spot
+   (out of hero flow so the hero/sections shift up); a body-level .mb-video-fab is
+   the visible circle, because #root's stacking context would trap the in-tree
+   circle UNDER the blur. */
+@media (max-width: 760px) {
+  .play-group {
+    position: fixed; right: 16px; bottom: 16px;
+    width: 56px; height: 56px; gap: 0;
+    opacity: 0; pointer-events: none; z-index: -1;
+  }
+  .play-label { display: none; }
+  .hero-ctas { margin-top: 26px; }
+}
+.mb-video-fab {
+  position: fixed; right: 16px; bottom: 16px; z-index: 900;
+  width: 56px; height: 56px; border-radius: 50%;
+  border: none; padding: 0; cursor: pointer; overflow: hidden;
+  background: #111; display: none;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+  -webkit-tap-highlight-color: transparent;
+}
+.mb-video-fab__video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; border-radius: 50%;
+}
+.mb-video-fab__btn {
+  position: absolute; inset: 0; z-index: 2;
+  display: grid; place-items: center; color: #fff;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6));
+}
+.mb-video-fab__btn svg { width: 16px; height: 16px; margin-left: 2px; }
+@media (max-width: 760px) { .mb-video-fab { display: block; } }
+
 /* Hero showreel — circle morphs into a clean custom player */
 .hsr__backdrop {
   position: fixed; inset: 0; z-index: 1200;
@@ -1601,6 +1635,23 @@ body.is-footer-visible .sp-fab {
 .cta-session__btn svg { width: 18px; height: 18px; transition: transform 0.25s ease; }
 .cta-session__btn:hover { background: #fff; transform: translateY(-2px); }
 .cta-session__btn:hover svg { transform: translateX(4px); }
+.cta-session__meta {
+  margin: 18px 0 0;
+  display: flex; align-items: center; gap: 11px;
+  font-family: var(--display);
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  text-shadow: 0 2px 14px rgba(0,0,0,0.5);
+}
+.cta-session__meta-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #F8FF88; flex: none;
+}
+.cta-session__meta-sep { width: 3px; height: 3px; border-radius: 50%; background: rgba(255,255,255,0.4); flex: none; }
+@media (max-width: 640px) {
+  .cta-session__meta { font-size: 12px; flex-wrap: wrap; }
+}
 @media (max-width: 640px) {
   .cta-session { min-height: 440px; }
   .cta-session__inner { padding: 12% 8%; }
@@ -2692,7 +2743,7 @@ const Hero = () => {
       <h1>Boosting<br />next gen<br />brands</h1>
       <p className="hero-sub">Wij combineren AI met 11 jaar praktijkervaring in branding, content en websites. Merken zoals <RotatingBrand /> vertrouwen ons om op te vallen, relevant te blijven en te groeien in een tijd waarin alles sneller en generieker wordt.</p>
       <div className="hero-ctas">
-        <button className="pill-white">Bekijk ons werk</button>
+        <a className="pill-white" href="boost-scan.html">Start Boost Scan</a>
         <button type="button" className="play-group" onClick={() => setVideoOpen(true)} aria-label="Bekijk: So who is Mr Boost?">
           <span className="play-circle" ref={circleRef}>
             <video ref={circleVideoRef} className="play-circle__video" muted loop playsInline autoPlay preload="auto"></video>
@@ -3228,12 +3279,13 @@ const Careers = () => {
         <img className="cta-session__bg" src={window.CTA_IMAGE} alt="" loading="lazy" />
         <div className="cta-session__scrim" />
         <div className="cta-session__inner">
-          <h2 className="cta-session__title">Plan a<br />session with<br />MRBOOST</h2>
-          <p className="cta-session__sub">Ontdek hoe AI, strategie en branding jouw merk future-proof maken in een persoonlijke sessie met Mr Boost.</p>
-          <a className="cta-session__btn" href="contact.html">
-            Plan a session
+          <h2 className="cta-session__title">Your brand<br />has more<br />potential</h2>
+          <p className="cta-session__sub">Ontdek in 2 minuten waar jouw merk nog groei, aandacht en momentum laat liggen.</p>
+          <a className="cta-session__btn cta-session__btn--scan" href="boost-scan.html">
+            Start Boost Scan
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </a>
+          <p className="cta-session__meta"><span className="cta-session__meta-dot" />Vrijblijvend <span className="cta-session__meta-sep" /> Duurt minder dan 2 minuten</p>
         </div>
       </section>
     </>);
@@ -4056,7 +4108,7 @@ requestAnimationFrame(() => {
     '  .wa-fab:hover .wa-fab__icon svg:nth-child(1){translate:0 -100%;}',
     '  .wa-fab:hover .wa-fab__icon svg:nth-child(2){translate:0 -100%;}',
     '}',
-    '@media (max-width: 720px){.wa-fab{right:16px;bottom:16px;width:54px;height:54px;}.wa-fab__icon,.wa-fab__icon svg{width:25px;height:25px;}}',
+    '@media (max-width: 720px){.wa-fab{left:16px;right:auto;bottom:16px;width:54px;height:54px;}.wa-fab__icon,.wa-fab__icon svg{width:25px;height:25px;}}',
 
     /* Modal shell */
     '.whatsapp-modal{z-index:1001;pointer-events:none;display:flex;flex-flow:column;justify-content:center;align-items:center;position:fixed;inset:0;}',
@@ -5162,6 +5214,53 @@ function initBunnyPlayerBackground() {
   }
 })();
 
+</script>
+<!-- Mobile: body-level video circle (bottom-right), ABOVE the progressive blur.
+     Opens the same hero showreel by forwarding the click to the (hidden) React .play-group. -->
+<script>
+(function () {
+  var MOBILE = '(max-width: 760px)';
+  var SRC = 'https://vz-45716865-4aa.b-cdn.net/7a45a37b-5dc6-44f9-83bd-d0fe63635664/playlist.m3u8';
+  var PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>';
+  function build() {
+    if (document.querySelector('.mb-video-fab')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'mb-video-fab';
+    btn.setAttribute('aria-label', 'Bekijk: So who is Mr Boost?');
+    btn.innerHTML =
+      '<video class="mb-video-fab__video" muted loop playsinline preload="none"></video>' +
+      '<span class="mb-video-fab__btn">' + PLAY_SVG + '</span>';
+    document.body.appendChild(btn);
+
+    var video = btn.querySelector('video');
+    video.muted = true; video.setAttribute('muted', ''); video.setAttribute('playsinline', '');
+    var attached = false;
+    function attach() {
+      if (attached) return; attached = true;
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = SRC;                                   // native HLS (iOS Safari)
+      } else if (window.Hls && window.Hls.isSupported()) {
+        var h = new window.Hls({ capLevelToPlayerSize: true });
+        h.loadSource(SRC); h.attachMedia(video);
+      } else {
+        video.src = SRC;
+      }
+      var p = video.play(); if (p && p.catch) p.catch(function () {});
+    }
+    function sync() { if (window.matchMedia(MOBILE).matches) attach(); }
+    sync();
+    var mq = window.matchMedia(MOBILE);
+    try { mq.addEventListener('change', sync); } catch (e) { mq.addListener(sync); }
+
+    btn.addEventListener('click', function () {
+      var pg = document.querySelector('.play-group');
+      if (pg) pg.click();        // opens the React showreel, morphing from the (hidden) circle
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
+  else build();
+})();
 </script>
 <script src="chrome.js" defer></script>
 </body>

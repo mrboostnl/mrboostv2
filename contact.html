@@ -184,17 +184,18 @@ img, svg { display: block; max-width: 100%; }
 
 /* ============== PAGE TITLE ============== */
 .page-title {
-  padding: 70px 40px 30px;
-  display: grid; grid-template-columns: 1fr auto;
-  gap: 60px;
-  align-items: end;
+  padding: 28px 40px 24px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 30px;
+  text-align: center;
 }
 .page-title h1 {
-  font-family: var(--display-bold);
-  font-weight: 700;
-  font-size: clamp(56px, 9vw, 132px);
-  line-height: 0.9;
-  letter-spacing: -0.045em;
+  font-family: var(--display-ultra);
+  font-weight: 900;
+  font-size: clamp(56px, 9.5vw, 136px);
+  line-height: 0.79;
+  letter-spacing: -0.027em;
+  text-transform: uppercase;
   color: var(--cream);
 }
 .page-title-right {
@@ -223,7 +224,7 @@ img, svg { display: block; max-width: 100%; }
 /* ============== DIVIDER ============== */
 .divider {
   height: 1px;
-  margin: 24px 40px 50px;
+  margin: 16px 40px 40px;
   background: rgba(255,255,255,0.1);
 }
 
@@ -502,9 +503,7 @@ img, svg { display: block; max-width: 100%; }
   .header { padding: 16px 20px; gap: 12px; grid-template-columns: auto 1fr auto; }
   .header-left-text { display: none; }
   .main-nav { display: none; }
-  .page-title { padding: 36px 22px 26px; grid-template-columns: 1fr; gap: 20px; }
-  .page-title-right { flex-direction: row-reverse; justify-content: flex-end; gap: 18px; }
-  .page-title-right .asterisk-star { width: 90px; height: 90px; }
+  .page-title { padding: 20px 22px 20px; grid-template-columns: 1fr; gap: 20px; }
   .meta-row { grid-template-columns: 1fr; gap: 24px; padding: 0 24px 30px; }
   .divider { margin: 12px 24px 30px; }
   .form-card { padding: 36px 24px; margin: 0 24px 40px; border-radius: 24px; }
@@ -565,26 +564,7 @@ html.pt-leave::after{animation:pt-fade-out .45s cubic-bezier(.4,0,1,1) forwards;
 <body>
 
 <section class="page-title" data-screen-label="02 Contact / Title">
-  <h1 data-split="heading" data-split-reveal="chars">Contact</h1>
-  <div class="page-title-right">
-    <svg class="asterisk-star" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <defs>
-        <polygon id="spike-c" points="0,-95 5,-25 0,0 -5,-25"/>
-      </defs>
-      <g style="fill: #B4A8F5;" transform="translate(100, 100)">
-        <use href="#spike-c" transform="rotate(0)"/>
-        <use href="#spike-c" transform="rotate(36)"/>
-        <use href="#spike-c" transform="rotate(72)"/>
-        <use href="#spike-c" transform="rotate(108)"/>
-        <use href="#spike-c" transform="rotate(144)"/>
-        <use href="#spike-c" transform="rotate(180)"/>
-        <use href="#spike-c" transform="rotate(216)"/>
-        <use href="#spike-c" transform="rotate(252)"/>
-        <use href="#spike-c" transform="rotate(288)"/>
-        <use href="#spike-c" transform="rotate(324)"/>
-      </g>
-    </svg>
-  </div>
+  <h1>Contact</h1>
 </section>
 
 <div class="divider"></div>
@@ -593,7 +573,7 @@ html.pt-leave::after{animation:pt-fade-out .45s cubic-bezier(.4,0,1,1) forwards;
   <div class="meta-block">
     <p class="meta-label">Volg ons op social media</p>
     <div class="pill-row">
-      <a href="https://www.tiktok.com/@mrboost" target="_blank" rel="noopener" class="pill-dark solid">
+      <a href="https://www.tiktok.com/@themrboost" target="_blank" rel="noopener" class="pill-dark solid">
         TikTok
         <span class="icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.3 2 1.5 3.6 3.5 4v2.5c-1.3 0-2.6-.4-3.5-1v6.4c0 3.3-2.5 5.6-5.6 5.6A5.5 5.5 0 0 1 5.4 15c0-3.1 2.7-5.5 6-5.1v2.7a2.8 2.8 0 0 0-3.3 2.6 2.7 2.7 0 0 0 5.4.1V3h3z"/></svg></span>
       </a>
@@ -970,7 +950,7 @@ if (form) form.addEventListener('submit', (e) => {
     '  .wa-fab:hover .wa-fab__icon svg:nth-child(1){translate:0 -100%;}',
     '  .wa-fab:hover .wa-fab__icon svg:nth-child(2){translate:0 -100%;}',
     '}',
-    '@media (max-width: 720px){.wa-fab{right:16px;bottom:16px;width:54px;height:54px;}.wa-fab__icon,.wa-fab__icon svg{width:25px;height:25px;}}',
+    '@media (max-width: 720px){.wa-fab{left:16px;right:auto;bottom:16px;width:54px;height:54px;}.wa-fab__icon,.wa-fab__icon svg{width:25px;height:25px;}}',
 
     /* Modal shell */
     '.whatsapp-modal{z-index:1001;pointer-events:none;display:flex;flex-flow:column;justify-content:center;align-items:center;position:fixed;inset:0;}',
