@@ -241,7 +241,7 @@ img,svg{display:block;max-width:100%;}
 <div class="toast" id="toast"></div>
 
 <!-- ====== BOOST CRM CONFIG — zelfde URL als in boost-scan.html (zie boost-crm-setup.md). Leeg = lokale modus. ====== -->
-<script>window.BOOST_CONFIG = { endpoint: "" };</script>
+<script>window.BOOST_CONFIG = { endpoint: "https://script.google.com/macros/s/AKfycbzhRBu3rCILPM_5ArO9Wirs_cHqt8hCKX1xUJ2nJQscyXQxYKVvIPNFtcQCvf_qXMzp/exec" };</script>
 
 <script>
 (function(){
@@ -412,7 +412,7 @@ img,svg{display:block;max-width:100%;}
       '<div class="detail__body">' +
         '<div class="contact-row">' +
           contact('mail','E-mail', l.email, 'mailto:'+encodeURIComponent(l.email||'')) +
-          contact('phone','Telefoon', l.phone||'—', l.phone?('tel:'+l.phone.replace(/\\s/g,'')):null) +
+          contact('phone','Telefoon', l.phone||'—', l.phone?('tel:'+String(l.phone).replace(/\\s/g,'')):null) +
         '</div>' +
         '<div class="status-pills" id="statusPills">' +
           '<button class="status-pill '+(st==='new'?'on-new':'')+'" data-status="new">Nieuw</button>' +
