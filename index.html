@@ -2082,6 +2082,7 @@ html.pt-leave::after{animation:pt-fade-out .45s cubic-bezier(.4,0,1,1) forwards;
   window.addEventListener('pageshow', function(ev){ if(ev.persisted){ document.documentElement.classList.remove('pt-leave'); } });
 })();
 </script>
+<link rel="stylesheet" href="chrome.css">
 </head>
 <body>
 <div id="root"></div>
@@ -3578,15 +3579,11 @@ const HamburgerNav = () => {
 
 const App = () =>
 <>
-    <Header />
     <Hero />
     <Clients />
     <PhotoArc />
     <Work />
     <Careers />
-    <FinalAndFooter />
-    <HamburgerNav />
-    <StartProjectFAB />
   </>;
 
 
@@ -5166,5 +5163,6 @@ function initBunnyPlayerBackground() {
 })();
 
 </script>
+<script src="chrome.js" defer></script>
 </body>
 </html>
