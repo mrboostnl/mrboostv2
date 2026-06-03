@@ -582,6 +582,11 @@ body.is-footer-visible .sp-fab {
   -webkit-mask: linear-gradient(#0000 88%, #000 100%);
   mask: linear-gradient(#0000 88%, #000 100%);
 }
+/* Hide the bottom progressive blur on mobile/touch (it warps while scrolling);
+   keep it on desktop. */
+@media (max-width: 768px) {
+  .progressive-blur { display: none !important; }
+}
 
 /* ---------- FOOTER ---------- */
 .chrome-footer-wrap {
