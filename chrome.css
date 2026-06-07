@@ -17,6 +17,7 @@ body.has-chrome {
 .header {
   position: sticky; top: 0; z-index: 50;
   padding: 22px 32px;
+  padding-top: calc(22px + env(safe-area-inset-top));
   display: grid; grid-template-columns: 1fr auto 1fr;
   align-items: center;
   background: linear-gradient(to bottom, rgba(7,7,7,0.96) 0%, rgba(7,7,7,0.78) 38%, rgba(7,7,7,0.36) 72%, rgba(7,7,7,0) 100%);
@@ -108,7 +109,7 @@ body.has-chrome {
 @media (max-width: 720px) { .story-text { display: none; } }
 /* On mobile the hamburger always leads; the text nav never shows */
 @media (max-width: 760px) {
-  .header { padding: 18px 20px; }
+  .header { padding: 18px 20px; padding-top: calc(18px + env(safe-area-inset-top)); }
   .main-nav { display: none !important; }
   .navigation { opacity: 1 !important; visibility: visible !important; }
   .navigation .hamburger-nav { opacity: 1 !important; transform: scale(1) rotate(0.001deg) !important; }
@@ -299,7 +300,7 @@ body.has-chrome {
   transform: translateY(0) rotate(-45deg);
 }
 @media (max-width: 760px) {
-  .hamburger-nav { top: 1em; right: 1em; }
+  .hamburger-nav { top: calc(1em + env(safe-area-inset-top)); right: 1em; }
   .hamburger-nav__p { font-size: 1.5em; }
 }
 

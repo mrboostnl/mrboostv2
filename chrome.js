@@ -22,6 +22,7 @@
   const NAV_LINKS = [
     { href: 'index.html',      label: 'Home' },
     { href: 'playground.html', label: 'Playground' },
+    { href: 'Video.html',      label: 'Shorts' },
     { href: 'about.html',      label: 'About' },
     { href: 'contact.html',    label: 'Contact' },
   ];
@@ -266,7 +267,7 @@
             <div class="chrome-footer-col__links">
               <a href="#">Instagram</a>
               <a href="https://www.tiktok.com/@themrboost" target="_blank" rel="noopener">TikTok</a>
-              <a href="#">LinkedIn</a>
+              <a href="https://www.linkedin.com/in/denniskraus-mrboost?utm_source=share_via&utm_content=profile&utm_medium=member_ios" target="_blank" rel="noopener">LinkedIn</a>
               <a href="https://www.youtube.com/@Mr-Boost/videos" target="_blank" rel="noopener">YouTube</a>
             </div>
           </div>
