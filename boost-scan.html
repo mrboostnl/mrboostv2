@@ -118,6 +118,10 @@ img,svg{display:block;max-width:100%;}
 .scan-sub{ margin-top:16px; font-size:16px; line-height:1.5; color:var(--text-dim); max-width:520px; }
 
 /* ===== option cards ===== */
+.scan-multi{ display:inline-flex; align-items:center; gap:6px; margin-top:14px; font-size:12px; font-weight:500; letter-spacing:.01em; color:var(--text-dim); opacity:.8; }
+.scan-multi svg{ width:13px; height:13px; color:var(--text-dim); flex:none; }
+.scan-multi + .scan-cards{ margin-top:16px; }
+.scan-step.is-active .scan-multi{ animation:rise .65s var(--ease-out) both; animation-delay:.06s; }
 .scan-cards{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:30px; }
 .scan-opt{
   position:relative; overflow:hidden;
@@ -134,16 +138,16 @@ img,svg{display:block;max-width:100%;}
 @keyframes cardIn{to{opacity:1;transform:translateY(0)}}
 .scan-opt__idx{ flex:none; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; font-family:var(--ultra); font-size:11px; color:var(--text-dim); background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); transition:all .3s var(--ease); }
 .scan-opt__label{ flex:1; }
-.scan-opt__check{ flex:none; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; border:1px solid rgba(255,255,255,.22); transition:all .3s var(--ease-out); transform:scale(.7); opacity:0; }
-.scan-opt__check svg{ width:12px; height:12px; color:#0a0a0a; }
+.scan-opt__check{ flex:none; width:22px; height:22px; border-radius:6px; display:grid; place-items:center; border:1.5px solid rgba(255,255,255,.28); transition:all .3s var(--ease-out); }
+.scan-opt__check svg{ width:12px; height:12px; color:#0a0a0a; opacity:0; transform:scale(.6); transition:opacity .22s var(--ease-out), transform .22s var(--ease-out); }
 .scan-opt::before{ content:''; position:absolute; top:0; left:-60%; width:42%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.06),transparent); transform:skewX(-18deg); pointer-events:none; opacity:0; }
 .scan-opt:hover{ border-color:var(--line-strong); transform:translateY(-2px); box-shadow:0 12px 30px rgba(0,0,0,.35); }
 .scan-opt:hover::before{ opacity:1; animation:sheen .85s var(--ease-out); }
 @keyframes sheen{from{left:-60%}to{left:135%}}
 .scan-opt.is-sel{ border-color:var(--cream); background:var(--cream); color:#0a0a0a; }
 .scan-opt.is-sel .scan-opt__idx{ background:rgba(10,10,10,.08); color:#0a0a0a; border-color:rgba(10,10,10,.14); }
-.scan-opt.is-sel .scan-opt__check{ background:#0a0a0a; border-color:#0a0a0a; transform:scale(1); opacity:1; }
-.scan-opt.is-sel .scan-opt__check svg{ color:var(--cream); }
+.scan-opt.is-sel .scan-opt__check{ background:#0a0a0a; border-color:#0a0a0a; }
+.scan-opt.is-sel .scan-opt__check svg{ color:var(--cream); opacity:1; transform:scale(1); }
 .scan-opt.is-sel:hover{ background:#fff; border-color:#fff; transform:translateY(-2px); box-shadow:0 12px 30px rgba(0,0,0,.35); }
 .scan-opt.pop{ animation:pop .4s var(--ease-out); }
 @keyframes pop{0%{transform:scale(1)}42%{transform:scale(1.025)}100%{transform:scale(1)}}
@@ -327,16 +331,22 @@ img,svg{display:block;max-width:100%;}
   background:radial-gradient(circle at 50% 38%, rgba(255,255,255,.12), rgba(255,255,255,.03)); box-shadow:0 6px 20px rgba(0,0,0,.28); }
 .scan-score__pain{ margin-top:14px; font-size:15.5px; line-height:1.5; color:var(--text-dim); max-width:560px; text-wrap:pretty; }
 .scan-score__pain b{ color:var(--cream); font-weight:600; }
-.scan-score__meter{ display:flex; align-items:center; gap:16px; margin-top:20px; }
-.scan-score__bars{ display:flex; gap:3px; align-items:stretch; flex:1; }
-.scan-score__bar{ flex:1; height:36px; border-radius:3px; background:rgba(255,255,255,.09); transform-origin:bottom; }
-.scan-step.is-active .scan-score__bar{ animation:barIn .5s var(--ease-out) both; animation-delay:calc(.05s + var(--i,0)*.012s); }
-@keyframes barIn{ from{ transform:scaleY(.18); opacity:0; } to{ transform:scaleY(1); opacity:1; } }
-.scan-score__num{ flex:none; display:flex; align-items:baseline; gap:1px; font-family:var(--ultra); }
-.scan-score__num b{ font-size:28px; font-weight:900; color:var(--cream); letter-spacing:-.01em; }
-.scan-score__num span{ font-size:14px; color:var(--text-dim); }
+@keyframes barIn{ from{ transform:scaleY(.32); } to{ transform:scaleY(1); } }
+.scan-gauge{ margin-top:24px; }
+.scan-gauge__row{ margin-top:18px; }
+.scan-gauge__row:first-child{ margin-top:0; }
+.scan-gauge__label{ display:flex; align-items:center; gap:10px; font-size:11.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); margin-bottom:10px; }
+.scan-gauge__label--pot{ color:var(--cream-2); }
+.scan-gauge__gap{ font-family:var(--ultra); font-size:11.5px; letter-spacing:0; text-transform:none; color:#0a0a0a; background:var(--yellow); padding:2px 8px; border-radius:999px; }
+.scan-gauge__bar{ display:flex; gap:3px; align-items:stretch; }
+.scan-gauge__seg{ flex:1; height:28px; border-radius:3px; background:rgba(255,255,255,.07); transform-origin:bottom; }
+.scan-step.is-active .scan-gauge__seg{ animation:barIn .5s var(--ease-out) both; animation-delay:calc(.05s + var(--i,0)*.012s); }
+.scan-gauge__copy{ margin-top:17px; font-size:13.5px; line-height:1.5; color:var(--text-dim); max-width:560px; text-wrap:pretty; }
+.scan-gauge__copy b{ color:var(--cream); font-weight:600; }
 .scan-acc__sub{ display:block; font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:11px; }
 .scan-acc__sub--mt{ margin-top:20px; }
+.scan-acc__note{ margin-top:15px; font-size:13px; line-height:1.5; color:var(--text-dim); }
+.scan-acc__note b{ color:var(--cream); font-weight:600; }
 .scan-field__req{ position:absolute; top:50%; right:16px; transform:translateY(-50%); color:#FBFD78; font-size:15px; pointer-events:none; }
 .scan-form .scan-field{ position:relative; }
 .scan-reqnote{ grid-column:1 / -1; margin-top:2px; font-size:12px; color:var(--text-dim); }
@@ -563,9 +573,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="scan-score__emoji" id="diagEmoji">😬</span>
           </div>
           <p class="scan-score__pain" id="diagPain">Vooral je merk-uitstraling en zichtbaarheid houden je groei nu tegen.</p>
-          <div class="scan-score__meter">
-            <div class="scan-score__bars" id="diagBars"></div>
-            <div class="scan-score__num"><b id="diagScore">58</b><span>/100</span></div>
+          <div class="scan-gauge">
+            <div class="scan-gauge__row">
+              <span class="scan-gauge__label">Huidige merkpositie</span>
+              <div class="scan-gauge__bar" id="gaugeNow"></div>
+            </div>
+            <div class="scan-gauge__row">
+              <span class="scan-gauge__label scan-gauge__label--pot">Groeipotentie <span class="scan-gauge__gap" id="gaugeGap">+34%</span></span>
+              <div class="scan-gauge__bar" id="gaugePot"></div>
+            </div>
+            <p class="scan-gauge__copy">De ruimte tussen beide meters is de groei die <b>nu nog blijft liggen.</b></p>
           </div>
         </div>
 
@@ -576,12 +593,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="scan-acc__body">
             <span class="scan-acc__sub">Wat je antwoorden laten zien</span>
             <ul class="scan-insight" id="diagInsight"></ul>
-            <span class="scan-acc__sub scan-acc__sub--mt">In de sessie bespreken we</span>
-            <ul class="scan-tease__list" id="diagTease"></ul>
+            <span class="scan-acc__sub scan-acc__sub--mt">Hier liggen nog kansen</span>
+            <ul class="scan-insight" id="diagOpps"></ul>
+            <p class="scan-acc__note">In de sessie kijken we samen welke van deze kansen <b>écht impact maken</b> voor jullie merk.</p>
           </div>
         </details>
 
         <p class="scan-final__line">Dennis denkt graag in een korte sessie van 30 minuten met jullie mee hoe je dit slim in fasen aanpakt, passend binnen het beschikbare budget.</p>
+
+        <button type="button" class="scan-vmsg2" id="vmsgOpen" aria-label="Bekijk de videoboodschap van Dennis">
+          <span class="scan-vmsg2__circle">
+            <video class="scan-vmsg2__video" id="vmsgPreview" muted loop playsinline preload="auto"></video>
+          </span>
+          <span class="scan-vmsg2__text"><b>Twijfel je nog?</b>Bekijk de korte videoboodschap van Dennis.</span>
+          <span class="scan-vmsg2__cta"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+        </button>
 
         <div class="scan-formcard">
           <span class="scan-formcard__title">Plan je gratis Boost-sessie</span>
@@ -597,14 +623,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </form>
           <p class="scan-note scan-note--rotate"><span class="scan-note__rot" id="scanNoteRot">Boost-sessie van 30 minuten</span></p>
         </div>
-
-        <button type="button" class="scan-vmsg2" id="vmsgOpen" aria-label="Bekijk de videoboodschap van Dennis">
-          <span class="scan-vmsg2__circle">
-            <video class="scan-vmsg2__video" id="vmsgPreview" muted loop playsinline preload="auto"></video>
-          </span>
-          <span class="scan-vmsg2__text"><b>Twijfel je nog?</b>Bekijk de korte videoboodschap van Dennis.</span>
-          <span class="scan-vmsg2__cta"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
-        </button>
 
         <div class="scan-proof2">
           <span class="scan-proof2__item">
@@ -781,19 +799,26 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       else pEl.innerHTML = 'Er is duidelijk ruimte om meer uit je merk te halen.';
     }
 
-    var score = 74 - recognise.length * 5 - risks.length * 4;
-    score = Math.max(38, Math.min(72, score));
-    var sEl = document.getElementById('diagScore'); if(sEl) sEl.textContent = score;
-    var barsEl = document.getElementById('diagBars');
-    if(barsEl){
-      var TOTAL = 34, filled = Math.round(score / 100 * TOTAL), bhtml = '';
-      var hue = (12 + (score - 38) / (72 - 38) * 118).toFixed(0); // amber (low) → green (high)
-      for(var bi = 0; bi < TOTAL; bi++){
-        if(bi < filled){ bhtml += '<span class="scan-score__bar" style="--i:' + bi + ';background:hsl(' + hue + ',70%,55%)"></span>'; }
-        else { bhtml += '<span class="scan-score__bar" style="--i:' + bi + '"></span>'; }
-      }
-      barsEl.innerHTML = bhtml;
+    var score = 60 - recognise.length * 5 - risks.length * 4;
+    score = Math.max(28, Math.min(52, score));
+    var potential = Math.min(90, score + 40);
+    var TOTAL = 30;
+    var nowFill = Math.round(score / 100 * TOTAL);
+    var potFill = Math.round(potential / 100 * TOTAL);
+    var dangerHue = (16 + (score - 28) / (52 - 28) * 20).toFixed(0); // red-orange (low) → amber (higher)
+    var nowColor = 'background:#FF5353';
+    var potSolid = 'background:hsl(132,62%,47%)';
+    var potGhost = 'background:hsl(132,52%,52%);opacity:.34';
+    function gaugeBar(fn){
+      var h = '';
+      for(var i = 0; i < TOTAL; i++){ h += '<span class="scan-gauge__seg" style="--i:' + i + ';' + fn(i) + '"></span>'; }
+      return h;
     }
+    var nowEl = document.getElementById('gaugeNow');
+    if(nowEl) nowEl.innerHTML = gaugeBar(function(i){ return i < nowFill ? nowColor : ''; });
+    var potEl = document.getElementById('gaugePot');
+    if(potEl) potEl.innerHTML = gaugeBar(function(i){ return i < potFill ? (i < nowFill ? potSolid : potGhost) : ''; });
+    var gapEl = document.getElementById('gaugeGap'); if(gapEl) gapEl.textContent = '+' + Math.round((potential - score) / score * 100) + '%';
 
     var insEl = document.getElementById('diagInsight');
     if(insEl){
@@ -802,6 +827,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       risks.forEach(function(a){ var t = INSIGHT_R[a]; if(t && bullets.length < 3 && !seen[t]){ seen[t] = 1; bullets.push(t); } });
       if(!bullets.length) bullets = ['Je gaf aan dat er meer uit je merk te halen valt'];
       insEl.innerHTML = bullets.slice(0,3).map(function(b,i){ return '<li style="--i:'+i+'">' + b + '</li>'; }).join('');
+    }
+
+    /* opportunities — reflect our work (websites, rebranding, positionering, AI, ads), kept global */
+    var OPP = {
+      'AI chaos':'AI slim inzetten in je merk en content',
+      'Zwakke branding':'Een sterker merk via rebranding en positionering',
+      'Te weinig omzet':'Een website die beter verkoopt',
+      'Te weinig aandacht':'Meer zichtbaarheid met ads en content',
+      'Geen duidelijke richting':'Een scherpere positionering en richting',
+      'Meer potentieel dan resultaat':'Je merk opnieuw neerzetten zodat het potentieel eruit komt'
+    };
+    var OPP_R = {
+      'Omzet mislopen':'Een sterkere funnel met website en ads',
+      'Concurrenten groeien harder':'Een onderscheidende positionering',
+      'Onzichtbaar blijven':'Meer bereik via ads en social',
+      'Achterlopen op AI':'AI-toepassingen die je een voorsprong geven',
+      'Middelmatige content':'Content en creatie die wél opvalt',
+      'Geen groei':'Een merk- en groeiaanpak in fasen'
+    };
+    var oppEl = document.getElementById('diagOpps');
+    if(oppEl){
+      var oseen = {}, opps = [];
+      recognise.forEach(function(a){ var t = OPP[a]; if(t && !oseen[t]){ oseen[t] = 1; opps.push(t); } });
+      risks.forEach(function(a){ var t = OPP_R[a]; if(t && opps.length < 3 && !oseen[t]){ oseen[t] = 1; opps.push(t); } });
+      if(!opps.length) opps = ['Een scherpere positionering en richting','Meer zichtbaarheid met ads en content'];
+      oppEl.innerHTML = opps.slice(0,3).map(function(b,i){ return '<li style="--i:'+i+'">' + b + '</li>'; }).join('');
     }
 
     var tzEl = document.getElementById('diagTease');
@@ -982,6 +1033,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
 
   /* ---- init ---- */
+  /* multi-select hint chip on every multi step */
+  document.querySelectorAll('.scan-cards[data-multi]').forEach(function(cards){
+    var hint = document.createElement('div');
+    hint.className = 'scan-multi';
+    hint.innerHTML = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h6M4 12h6M4 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 8l2.4 2.4L21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Meerdere opties mogelijk';
+    cards.parentNode.insertBefore(hint, cards);
+  });
   restore();
   (function initSlider(){
     if(!range) return;
@@ -1103,6 +1161,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <script>
 (function(){
+  var track = document.getElementById('diagTrack'), tip = document.getElementById('diagTip');
+  if(track && tip){
+    track.querySelectorAll('.scan-score__zone').forEach(function(z){
+      z.addEventListener('mouseenter', function(){
+        tip.textContent = z.getAttribute('data-tip');
+        var r = z.getBoundingClientRect(), tr = track.getBoundingClientRect();
+        tip.style.left = (r.left - tr.left + r.width / 2) + 'px';
+        tip.style.opacity = '1';
+      });
+      z.addEventListener('mouseleave', function(){ tip.style.opacity = '0'; });
+    });
+  }
+})();
+(function(){
   var el = document.getElementById('scanNoteRot');
   if(!el) return;
   if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -1118,6 +1190,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   }, 4200);
 })();
 </script>
+
+<template id="__bundler_thumbnail" data-bg-color="#0a0a0a">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0a0a0a"/>
+    <rect x="380" y="300" width="150" height="12" rx="6" fill="#555"/>
+    <rect x="380" y="332" width="300" height="46" rx="11" fill="#FF5353"/>
+    <rect x="380" y="430" width="150" height="12" rx="6" fill="#777"/>
+    <rect x="380" y="462" width="440" height="46" rx="11" fill="#5BE26B"/>
+  </svg>
+</template>
 
 </body>
 </html>
