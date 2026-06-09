@@ -35,6 +35,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   --cream:#e9e8e3;
   --cream-2:#d9d8d2;
   --yellow:#F8FF88;
+  --red:#FB3B30;
   --card:#121211;
   --card-2:#0e0e0d;
   --line:rgba(255,255,255,0.10);
@@ -150,9 +151,11 @@ img,svg{display:block;max-width:100%;}
 /* ===== value slider (step 4) ===== */
 .scan-slider{ margin-top:32px; }
 .scan-slider__value{ font-family:var(--ultra); font-weight:900; font-size:clamp(44px,7vw,76px); line-height:.95; letter-spacing:-.022em; color:var(--cream); }
+.scan-slider__note{ margin-top:10px; height:15px; font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dim); opacity:0; transition:opacity .25s var(--ease); }
+.scan-slider__note.is-on{ opacity:1; }
 .scan-range{
   -webkit-appearance:none; appearance:none; width:100%; height:6px; margin-top:34px;
-  border-radius:999px; outline:none; cursor:pointer; --p:33%;
+  border-radius:999px; outline:none; cursor:pointer; --p:50%;
   background:linear-gradient(90deg, var(--cream) 0, var(--cream) var(--p), rgba(255,255,255,.12) var(--p), rgba(255,255,255,.12) 100%);
 }
 .scan-range::-webkit-slider-thumb{ -webkit-appearance:none; width:30px; height:30px; border-radius:50%; background:var(--cream); border:3px solid #0a0a0a; box-shadow:0 6px 20px rgba(0,0,0,.55); cursor:grab; transition:transform .15s var(--ease-out); }
@@ -217,6 +220,162 @@ img,svg{display:block;max-width:100%;}
 .scan-cta-line{ margin-top:16px; font-size:15px; line-height:1.55; color:var(--text-dim); max-width:560px; }
 .scan-cta-line b{ color:var(--cream); font-weight:700; }
 
+/* ===== step 5 — final: compact diagnosis + form card ===== */
+.scan-final-head{ margin-bottom:22px; }
+.scan-q--final{ font-size:clamp(28px,4vw,46px); }
+
+/* concise diagnosis chips (their own answers) */
+.scan-diag{ display:flex; flex-wrap:wrap; gap:9px; margin-top:20px; list-style:none; }
+@keyframes diagIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.scan-diag__chip{
+  display:inline-flex; align-items:center; gap:9px;
+  padding:9px 15px 9px 13px; border-radius:999px;
+  border:1px solid var(--line); background:var(--card);
+  font-size:14px; font-weight:500; color:var(--cream-2);
+}
+.scan-step.is-active .scan-diag__chip{ animation:diagIn .5s var(--ease-out) both; animation-delay:calc(.12s + var(--i,0)*.08s); }
+.scan-diag__chip::before{ content:''; width:5px; height:5px; border-radius:50%; background:var(--red); flex:none; }
+.scan-final__line{ margin-top:20px; font-size:16px; line-height:1.55; color:var(--text-dim); max-width:540px; text-wrap:pretty; }
+.scan-final__line b{ color:var(--cream); font-weight:600; }
+
+/* risk + potential blocks */
+.scan-diag2{ margin-top:22px; display:grid; gap:11px; }
+.scan-diag2__row{ display:flex; gap:13px; align-items:flex-start; padding:14px 17px; border-radius:14px; border:1px solid var(--line); background:var(--card); }
+.scan-diag2__row--risk{ border-left:3px solid var(--red); }
+.scan-diag2__row--pot{ border-left:3px solid var(--yellow); }
+.scan-step.is-active .scan-diag2__row{ animation:diagIn .5s var(--ease-out) both; }
+.scan-step.is-active .scan-diag2__row--pot{ animation-delay:.09s; }
+.scan-diag2__icon{ flex:none; font-size:15px; line-height:1.5; }
+.scan-diag2__row p{ font-size:14.5px; line-height:1.5; color:var(--cream-2); }
+.scan-diag2__row b{ color:var(--cream); font-weight:700; }
+
+/* personalized insight bullets */
+.scan-insight{ margin-top:20px; display:grid; gap:11px; list-style:none; }
+.scan-insight li{ position:relative; padding-left:20px; font-size:14.5px; line-height:1.5; color:var(--cream-2); }
+.scan-insight li::before{ content:''; position:absolute; left:0; top:.72em; width:9px; height:1.5px; border-radius:2px; background:var(--text-dim); }
+.scan-step.is-active .scan-insight li{ animation:diagIn .5s var(--ease-out) both; animation-delay:calc(.16s + var(--i,0)*.08s); }
+
+/* session tease — the open loop */
+.scan-tease{ margin-top:24px; padding:17px 20px 18px; border-radius:16px; border:1px solid var(--line); background:rgba(255,255,255,.022); }
+.scan-tease__label{ display:block; font-size:13px; font-weight:600; letter-spacing:.01em; color:var(--cream); margin-bottom:12px; }
+.scan-tease__list{ display:grid; gap:8px; list-style:none; }
+.scan-tease__list li{ position:relative; padding-left:24px; font-size:14px; line-height:1.45; color:var(--text-dim); }
+.scan-tease__list li::before{ content:''; position:absolute; left:5px; top:.5em; width:6px; height:6px; border-radius:50%; background:var(--yellow); }
+
+/* form lives in its own surface — divides the page calmly */
+.scan-formcard{
+  margin-top:26px; padding:24px 24px 22px; border-radius:18px;
+  border:1px solid var(--line); background:var(--card-2);
+}
+.scan-formcard__title{
+  display:block; font-family:var(--ultra); font-weight:900; font-size:18px;
+  letter-spacing:-.01em; text-transform:uppercase; color:var(--cream); margin-bottom:16px;
+}
+.scan-formcard .scan-form{ margin-top:0; }
+.scan-formcard .scan-note{ margin-top:14px; }
+
+/* small, calm video-message row — sits UNDER the form */
+.scan-vmsg2{
+  display:flex; align-items:center; gap:18px; width:100%; text-align:left;
+  margin-top:16px; padding:16px 18px; border-radius:16px;
+  border:1px solid var(--line); background:rgba(255,255,255,.018);
+  transition:border-color .25s var(--ease), background .25s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+.scan-vmsg2:hover{ border-color:var(--line-strong); background:rgba(255,255,255,.04); }
+.scan-vmsg2__circle{ position:relative; flex:none; width:66px; height:66px; border-radius:50%; overflow:hidden; background:#000; border:2px solid rgba(255,255,255,.16); box-shadow:0 6px 18px rgba(0,0,0,.35); }
+.scan-vmsg2__video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.scan-vmsg2__text{ flex:1; min-width:0; font-size:14px; line-height:1.45; color:var(--text-dim); }
+.scan-vmsg2__text b{ display:block; color:var(--cream); font-weight:600; font-size:15px; margin-bottom:1px; }
+.scan-vmsg2__cta{ flex:none; width:42px; height:42px; border-radius:50%; background:var(--cream); color:#0a0a0a; display:grid; place-items:center; transition:transform .25s var(--ease-out), box-shadow .25s var(--ease); }
+.scan-vmsg2__cta svg{ width:16px; height:16px; margin-left:2px; }
+.scan-vmsg2:hover .scan-vmsg2__cta{ transform:scale(1.07); box-shadow:0 6px 18px rgba(0,0,0,.35); }
+
+/* expandable diagnosis sections */
+.scan-acc{ margin-top:11px; border:1px solid var(--line); border-radius:14px; background:var(--card); overflow:hidden; }
+.scan-acc summary{ list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 17px; font-size:14.5px; font-weight:600; color:var(--cream); -webkit-tap-highlight-color:transparent; }
+.scan-acc summary::-webkit-details-marker{ display:none; }
+.scan-acc__chev{ flex:none; width:20px; height:20px; color:var(--text-dim); transition:transform .3s var(--ease); }
+.scan-acc[open] .scan-acc__chev{ transform:rotate(180deg); }
+.scan-acc__body{ padding:2px 17px 16px; }
+.scan-acc__body .scan-insight{ margin-top:6px; }
+.scan-acc__body .scan-tease__list{ margin-top:2px; display:grid; gap:11px; list-style:none; }
+.scan-acc__body .scan-tease__list li{ position:relative; padding-left:20px; font-size:14.5px; line-height:1.5; color:var(--cream-2); }
+.scan-acc__body .scan-tease__list li::before{ content:''; position:absolute; left:0; top:.72em; width:9px; height:1.5px; border-radius:2px; background:var(--text-dim); }
+
+/* clean social proof — bottom of step 5 (subtle, single row, non-clickable look) */
+.scan-proof2{ margin-top:22px; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:7px 13px; }
+.scan-proof2__item{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; color:rgba(255,255,255,.34); letter-spacing:.01em; }
+.scan-proof2__item b{ color:rgba(255,255,255,.55); font-weight:600; }
+.scan-proof2__stars{ display:inline-flex; gap:2px; color:rgba(224,162,60,.55); }
+.scan-proof2__stars svg{ width:13px; height:13px; }
+.scan-proof2__socials{ display:inline-flex; gap:5px; }
+.scan-proof2__socials svg{ width:14px; height:14px; }
+.scan-proof2__award{ width:20px; height:auto; }
+.scan-proof2__dot{ width:3px; height:3px; border-radius:50%; background:rgba(255,255,255,.18); }
+@media (max-width:520px){ .scan-proof2__dot{ display:none; } }
+
+/* clean diagnosis text (no boxes / emoji) */
+.scan-diag-lead{ margin-top:18px; font-size:17px; line-height:1.5; color:var(--cream); font-weight:500; max-width:560px; text-wrap:pretty; }
+.scan-diag-sub{ margin-top:10px; font-size:15px; line-height:1.55; color:var(--text-dim); max-width:560px; text-wrap:pretty; }
+
+/* score card (top of step 5) */
+.scan-score{ margin-bottom:6px; }
+.scan-score__row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+.scan-score__verdict{ margin-top:6px; }
+.scan-score__emoji{ flex:none; width:58px; height:58px; border-radius:50%; display:grid; place-items:center; font-size:30px; line-height:1; margin-top:4px;
+  background:radial-gradient(circle at 50% 38%, rgba(255,255,255,.12), rgba(255,255,255,.03)); box-shadow:0 6px 20px rgba(0,0,0,.28); }
+.scan-score__pain{ margin-top:14px; font-size:15.5px; line-height:1.5; color:var(--text-dim); max-width:560px; text-wrap:pretty; }
+.scan-score__pain b{ color:var(--cream); font-weight:600; }
+.scan-score__meter{ display:flex; align-items:center; gap:16px; margin-top:20px; }
+.scan-score__bars{ display:flex; gap:3px; align-items:stretch; flex:1; }
+.scan-score__bar{ flex:1; height:36px; border-radius:3px; background:rgba(255,255,255,.09); transform-origin:bottom; }
+.scan-step.is-active .scan-score__bar{ animation:barIn .5s var(--ease-out) both; animation-delay:calc(.05s + var(--i,0)*.012s); }
+@keyframes barIn{ from{ transform:scaleY(.18); opacity:0; } to{ transform:scaleY(1); opacity:1; } }
+.scan-score__num{ flex:none; display:flex; align-items:baseline; gap:1px; font-family:var(--ultra); }
+.scan-score__num b{ font-size:28px; font-weight:900; color:var(--cream); letter-spacing:-.01em; }
+.scan-score__num span{ font-size:14px; color:var(--text-dim); }
+.scan-acc__sub{ display:block; font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:11px; }
+.scan-acc__sub--mt{ margin-top:20px; }
+.scan-field__req{ position:absolute; top:50%; right:16px; transform:translateY(-50%); color:#FBFD78; font-size:15px; pointer-events:none; }
+.scan-form .scan-field{ position:relative; }
+.scan-reqnote{ grid-column:1 / -1; margin-top:2px; font-size:12px; color:var(--text-dim); }
+.scan-reqnote span{ color:#FBFD78; }
+
+/* ===== video-message player (HLS, same technique as homepage) ===== */
+.vp[hidden]{ display:none; }
+.vp__backdrop{ position:fixed; inset:0; z-index:1200; background:rgba(0,0,0,.85); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); opacity:0; transition:opacity .4s var(--ease); cursor:pointer; }
+.vp.is-open .vp__backdrop{ opacity:1; }
+.vp__player{
+  position:fixed; z-index:1201; left:50%; top:50%;
+  width:min(420px,92vw); aspect-ratio:9/16; max-height:86vh;
+  background:#000; border-radius:20px; overflow:hidden;
+  box-shadow:0 30px 90px rgba(0,0,0,.6);
+  opacity:0; transform:translate(-50%,-50%) scale(.92);
+  transition:opacity .4s var(--ease), transform .5s var(--ease-out);
+}
+.vp.is-open .vp__player{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+.vp__video{ width:100%; height:100%; object-fit:cover; display:block; background:#000; cursor:pointer; }
+.vp__close{
+  position:absolute; top:14px; right:14px; z-index:20; width:44px; height:44px; border-radius:50%;
+  border:none; cursor:pointer; background:rgba(0,0,0,.5); color:#fff; display:grid; place-items:center;
+  -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); transition:background .2s;
+}
+.vp__close:hover{ background:rgba(0,0,0,.82); }
+.vp__bigplay{
+  position:absolute; inset:0; margin:auto; z-index:3; width:76px; height:76px; border-radius:50%;
+  border:none; cursor:pointer; background:rgba(0,0,0,.42); color:#fff; display:grid; place-items:center;
+  -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+}
+.vp__bigplay[hidden]{ display:none; }
+.vp__bar{
+  position:absolute; left:0; right:0; bottom:0; z-index:3; display:flex; align-items:center; gap:12px;
+  padding:16px 16px 14px; background:linear-gradient(0deg, rgba(0,0,0,.62), rgba(0,0,0,0));
+}
+.vp__ctrl{ background:none; border:none; color:#fff; cursor:pointer; display:grid; place-items:center; width:24px; height:24px; flex:none; padding:0; }
+.vp__progress{ flex:1; height:4px; border-radius:2px; background:rgba(255,255,255,.28); overflow:hidden; }
+.vp__progress span{ display:block; height:100%; width:0%; background:#fff; border-radius:2px; }
+
 .scan-form{ margin-top:26px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .scan-field{ position:relative; }
 .scan-field--full{ grid-column:1 / -1; }
@@ -232,6 +391,9 @@ img,svg{display:block;max-width:100%;}
 .scan-submit{ grid-column:1 / -1; width:100%; justify-content:center; margin-top:4px; padding:19px; }
 .scan-note{ margin-top:18px; font-size:13px; letter-spacing:.04em; text-transform:uppercase; color:var(--text-dim); display:flex; align-items:center; gap:10px; justify-content:center; }
 .scan-note .sep{ width:3px;height:3px;border-radius:50%;background:var(--text-dim); }
+.scan-note--rotate{ height:1.25em; overflow:hidden; }
+.scan-note__rot{ display:inline-block; transition:opacity .42s var(--ease), transform .42s var(--ease); }
+.scan-note__rot.is-out{ opacity:0; transform:translateY(-8px); }
 
 /* ===== success ===== */
 .scan-success{ display:none; text-align:center; padding:24px 0; }
@@ -375,10 +537,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <h1 class="scan-q" id="q4">Wat is het je waard om dit te voorkomen?</h1>
         <p class="scan-sub">Groeien vraagt niet alleen om ambitie, maar ook om actie.</p>
         <div class="scan-slider" data-single="value">
-          <div class="scan-slider__value" id="valueLabel">€10K – €25K</div>
-          <input type="range" min="0" max="3" step="1" value="1" id="valueRange" class="scan-range" aria-label="Wat is het je waard" />
+          <div class="scan-slider__value" id="valueLabel">€25K – €50K</div>
+          <div class="scan-slider__note" id="valueNote">Meest gekozen</div>
+          <input type="range" min="0" max="4" step="1" value="2" id="valueRange" class="scan-range" aria-label="Wat is het je waard" />
           <div class="scan-slider__ticks" id="valueTicks">
-            <span>€5–10K</span><span>€10–25K</span><span>€25–50K</span><span>€50K+</span>
+            <span>€5–10K</span><span>€10–25K</span><span>€25–50K</span><span>€50–100K</span><span>€100K+</span>
           </div>
         </div>
         <div class="scan-foot">
@@ -391,23 +554,80 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <!-- STEP 5 -->
       <section class="scan-step" data-step="5" data-mood="positive">
-        <span class="scan-eyebrow"><span class="dot"></span>Jouw Boost-diagnose</span>
-        <h1 class="scan-q">Oké, dus je<br />wilt niet…</h1>
-        <div class="scan-summary">
-          <ul class="scan-summary__list" id="summaryList"></ul>
+        <div class="scan-score">
+          <div class="scan-score__row">
+            <div class="scan-score__head">
+              <span class="scan-eyebrow"><span class="dot"></span>Jouw Boost-diagnose</span>
+              <h1 class="scan-q scan-q--final scan-score__verdict" id="diagHeadline">Je laat groei liggen</h1>
+            </div>
+            <span class="scan-score__emoji" id="diagEmoji">😬</span>
+          </div>
+          <p class="scan-score__pain" id="diagPain">Vooral je merk-uitstraling en zichtbaarheid houden je groei nu tegen.</p>
+          <div class="scan-score__meter">
+            <div class="scan-score__bars" id="diagBars"></div>
+            <div class="scan-score__num"><b id="diagScore">58</b><span>/100</span></div>
+          </div>
         </div>
-        <p class="scan-lede">Je ziet dat er <b>meer potentieel</b> in jullie merk zit, maar dat richting, aandacht en strategie momenteel groei tegenhouden.</p>
-        <p class="scan-cta-line">Laat je gegevens achter en <b>Dennis</b> neemt contact met je op om samen te kijken hoe jullie weer momentum kunnen creëren.</p>
-        <form class="scan-form" id="scanForm" novalidate>
-          <div class="scan-field"><input type="text" name="name" placeholder="Naam" required /></div>
-          <div class="scan-field"><input type="text" name="company" placeholder="Bedrijfsnaam" required /></div>
-          <div class="scan-field"><input type="email" name="email" placeholder="E-mailadres" required /></div>
-          <div class="scan-field"><input type="tel" name="phone" placeholder="Telefoonnummer" required /></div>
-          <button type="submit" class="scan-next scan-submit">Plan mijn Boost sessie
-            <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </form>
-        <p class="scan-note">Vrijblijvend <span class="sep"></span> 30 minuten</p>
+
+        <details class="scan-acc">
+          <summary>Lees de volledige uitkomst
+            <span class="scan-acc__chev"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </summary>
+          <div class="scan-acc__body">
+            <span class="scan-acc__sub">Wat je antwoorden laten zien</span>
+            <ul class="scan-insight" id="diagInsight"></ul>
+            <span class="scan-acc__sub scan-acc__sub--mt">In de sessie bespreken we</span>
+            <ul class="scan-tease__list" id="diagTease"></ul>
+          </div>
+        </details>
+
+        <p class="scan-final__line">Dennis denkt graag in een korte sessie van 30 minuten met jullie mee hoe je dit slim in fasen aanpakt, passend binnen het beschikbare budget.</p>
+
+        <div class="scan-formcard">
+          <span class="scan-formcard__title">Plan je gratis Boost-sessie</span>
+          <form class="scan-form" id="scanForm" novalidate>
+            <div class="scan-field"><input type="text" name="name" placeholder="Naam" required /><span class="scan-field__req" aria-hidden="true">*</span></div>
+            <div class="scan-field"><input type="text" name="company" placeholder="Bedrijfsnaam" required /><span class="scan-field__req" aria-hidden="true">*</span></div>
+            <div class="scan-field"><input type="email" name="email" placeholder="E-mailadres" required /><span class="scan-field__req" aria-hidden="true">*</span></div>
+            <div class="scan-field"><input type="tel" name="phone" placeholder="Telefoonnummer" required /><span class="scan-field__req" aria-hidden="true">*</span></div>
+            <p class="scan-reqnote"><span>*</span> Alle velden zijn verplicht</p>
+            <button type="submit" class="scan-next scan-submit">Plan mijn sessie
+              <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </form>
+          <p class="scan-note scan-note--rotate"><span class="scan-note__rot" id="scanNoteRot">Boost-sessie van 30 minuten</span></p>
+        </div>
+
+        <button type="button" class="scan-vmsg2" id="vmsgOpen" aria-label="Bekijk de videoboodschap van Dennis">
+          <span class="scan-vmsg2__circle">
+            <video class="scan-vmsg2__video" id="vmsgPreview" muted loop playsinline preload="auto"></video>
+          </span>
+          <span class="scan-vmsg2__text"><b>Twijfel je nog?</b>Bekijk de korte videoboodschap van Dennis.</span>
+          <span class="scan-vmsg2__cta"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+        </button>
+
+        <div class="scan-proof2">
+          <span class="scan-proof2__item">
+            <span class="scan-proof2__stars">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01z"/></svg>
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01z"/></svg>
+            </span>
+            <span><b>280+ merken</b> gingen je voor</span>
+          </span>
+          <span class="scan-proof2__dot"></span>
+          <span class="scan-proof2__item">
+            <span><b>70.000+</b> volgers</span>
+          </span>
+          <span class="scan-proof2__dot"></span>
+          <span class="scan-proof2__item">
+            <svg class="scan-proof2__award" viewBox="0 0 42 24" fill="currentColor" aria-hidden="true"><g transform="translate(-316 -30)"><path d="M350.029,30l-7.664,23.848h-5.212l-4.138-15.342L328.876,54h-5.212L316,30.152h5.978l4.292,16.405,4.139-16.405h5.518l4.139,16.405,4.292-16.405Z"/><path d="M354.015,46.064a3.95,3.95,0,1,1-3.986,3.949A3.849,3.849,0,0,1,354.015,46.064Z"/></g></svg>
+            Award winning agency
+          </span>
+        </div>
+
         <div class="scan-foot" style="margin-top:22px;">
           <button type="button" class="scan-prev" data-prev><svg viewBox="0 0 24 24" fill="none"><path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Terug</button>
         </div>
@@ -492,10 +712,105 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var list = document.getElementById('summaryList');
     if(list){
       var picks = risks.length ? risks : ['Geen groei'];
-      list.innerHTML = picks.slice(0,4).map(function(r,i){
-        var line = SUMMARY[r] || ('…dat dit zo blijft.');
-        return '<li style="--i:'+i+'"><span class="x"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>'+line+'</li>';
+      list.innerHTML = picks.slice(0,3).map(function(r,i){
+        return '<li class="scan-diag__chip" style="--i:'+i+'">'+r+'</li>';
       }).join('');
+    }
+
+    /* ---- personalized diagnosis engine ---- */
+    var recognise = state.answers.recognise || [];
+    var ambition = state.answers.ambition || [];
+    var value = state.answers.value || '';
+
+    var RISK_PHRASE = {
+      'Omzet mislopen':'blijft er omzet liggen die je nu al zou kunnen pakken',
+      'Concurrenten groeien harder':'worden concurrenten sneller zichtbaar terwijl jullie merk achterblijft',
+      'Onzichtbaar blijven':'blijft jullie merk onzichtbaar voor de klanten die je wél wilt',
+      'Achterlopen op AI':'loopt de voorsprong die AI nú geeft langs jullie heen',
+      'Middelmatige content':'blijft content steken op gemiddeld, terwijl aandacht het nieuwe goud is',
+      'Geen groei':'stagneert de groei terwijl de markt gewoon doorschuift'
+    };
+    var INSIGHT = {
+      'AI chaos':'Je gaf aan dat AI inzetten nu nog rommelig voelt',
+      'Zwakke branding':'Je gaf aan dat je merk-uitstraling sterker mag',
+      'Te weinig omzet':'Je gaf aan dat je merk nog niet de omzet oplevert die je wilt',
+      'Te weinig aandacht':'Je gaf aan dat je merk te weinig aandacht krijgt',
+      'Geen duidelijke richting':'Je gaf aan dat de richting van je merk scherper mag',
+      'Meer potentieel dan resultaat':'Je gaf aan dat er meer in je merk zit dan eruit komt'
+    };
+    var INSIGHT_R = {
+      'Omzet mislopen':'Je wilt geen omzet meer mislopen',
+      'Concurrenten groeien harder':'Je wilt niet dat concurrenten sneller groeien',
+      'Onzichtbaar blijven':'Je wilt niet langer onzichtbaar blijven',
+      'Achterlopen op AI':'Je wilt niet achterlopen op AI',
+      'Middelmatige content':'Je wilt scherpere content dan gemiddeld',
+      'Geen groei':'Je wilt de groei weer op gang krijgen'
+    };
+
+    var verdict = 'Hier laat je groei liggen', emoji = '👀';
+    if(recognise.indexOf('Meer potentieel dan resultaat') > -1){ verdict = 'Je merk heeft meer potentie'; emoji = '🚀'; }
+    else if(risks.indexOf('Concurrenten groeien harder') > -1 || risks.indexOf('Achterlopen op AI') > -1){ verdict = 'Je laat groei liggen'; emoji = '😬'; }
+    else if(recognise.indexOf('Te weinig omzet') > -1 || risks.indexOf('Omzet mislopen') > -1){ verdict = 'Je laat omzet liggen'; emoji = '💸'; }
+    else if(ambition.indexOf('Marktleider worden') > -1 || ambition.indexOf('Sterker merk') > -1){ verdict = 'Je merk is klaar voor meer'; emoji = '🔥'; }
+    var hEl = document.getElementById('diagHeadline'); if(hEl) hEl.textContent = verdict;
+    var eEl = document.getElementById('diagEmoji'); if(eEl) eEl.textContent = emoji;
+
+    var PAIN = {
+      'Zwakke branding':'je merk-uitstraling',
+      'Te weinig aandacht':'jullie zichtbaarheid',
+      'AI chaos':'hoe AI nu wordt ingezet',
+      'Te weinig omzet':'de omzet uit je merk',
+      'Geen duidelijke richting':'de richting van je merk',
+      'Meer potentieel dan resultaat':'het onbenutte potentieel'
+    };
+    var PAIN_R = {
+      'Omzet mislopen':'de omzet die je misloopt',
+      'Onzichtbaar blijven':'jullie zichtbaarheid',
+      'Concurrenten groeien harder':'het tempo van concurrenten',
+      'Achterlopen op AI':'jullie AI-voorsprong',
+      'Middelmatige content':'de kwaliteit van je content',
+      'Geen groei':'jullie groeitempo'
+    };
+    var painParts = [];
+    recognise.forEach(function(r){ if(PAIN[r] && painParts.length < 2 && painParts.indexOf(PAIN[r]) < 0) painParts.push(PAIN[r]); });
+    risks.forEach(function(r){ if(PAIN_R[r] && painParts.length < 2 && painParts.indexOf(PAIN_R[r]) < 0) painParts.push(PAIN_R[r]); });
+    var pEl = document.getElementById('diagPain');
+    if(pEl){
+      if(painParts.length >= 2) pEl.innerHTML = 'Vooral <b>' + painParts[0] + '</b> en <b>' + painParts[1] + '</b> houden je groei nu tegen.';
+      else if(painParts.length === 1) pEl.innerHTML = 'Vooral <b>' + painParts[0] + '</b> houdt je groei nu tegen.';
+      else pEl.innerHTML = 'Er is duidelijk ruimte om meer uit je merk te halen.';
+    }
+
+    var score = 74 - recognise.length * 5 - risks.length * 4;
+    score = Math.max(38, Math.min(72, score));
+    var sEl = document.getElementById('diagScore'); if(sEl) sEl.textContent = score;
+    var barsEl = document.getElementById('diagBars');
+    if(barsEl){
+      var TOTAL = 34, filled = Math.round(score / 100 * TOTAL), bhtml = '';
+      var hue = (12 + (score - 38) / (72 - 38) * 118).toFixed(0); // amber (low) → green (high)
+      for(var bi = 0; bi < TOTAL; bi++){
+        if(bi < filled){ bhtml += '<span class="scan-score__bar" style="--i:' + bi + ';background:hsl(' + hue + ',70%,55%)"></span>'; }
+        else { bhtml += '<span class="scan-score__bar" style="--i:' + bi + '"></span>'; }
+      }
+      barsEl.innerHTML = bhtml;
+    }
+
+    var insEl = document.getElementById('diagInsight');
+    if(insEl){
+      var seen = {}, bullets = [];
+      recognise.forEach(function(a){ var t = INSIGHT[a]; if(t && !seen[t]){ seen[t] = 1; bullets.push(t); } });
+      risks.forEach(function(a){ var t = INSIGHT_R[a]; if(t && bullets.length < 3 && !seen[t]){ seen[t] = 1; bullets.push(t); } });
+      if(!bullets.length) bullets = ['Je gaf aan dat er meer uit je merk te halen valt'];
+      insEl.innerHTML = bullets.slice(0,3).map(function(b,i){ return '<li style="--i:'+i+'">' + b + '</li>'; }).join('');
+    }
+
+    var tzEl = document.getElementById('diagTease');
+    if(tzEl){
+      var tz = ['waar jullie nu groei verliezen','welke quick wins direct impact maken'];
+      if(recognise.indexOf('AI chaos') > -1 || risks.indexOf('Achterlopen op AI') > -1) tz.push('hoe AI juist versnelling creëert');
+      else if(ambition.indexOf('Premium klanten') > -1) tz.push('hoe je premium klanten aantrekt');
+      else tz.push('hoe jullie merk scherper kan positioneren');
+      tzEl.innerHTML = tz.map(function(t){ return '<li>' + t + '</li>'; }).join('');
     }
   }
 
@@ -570,13 +885,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   });
 
   /* ---- value slider ---- */
-  var VALUES = ['€5K – €10K','€10K – €25K','€25K – €50K','€50K+'];
+  var VALUES = ['€5K – €10K','€10K – €25K','€25K – €50K','€50K – €100K','€100K+'];
+  var POPULAR = 2;
   var range = document.getElementById('valueRange');
   var valueLabel = document.getElementById('valueLabel');
   var valueTicks = document.querySelectorAll('#valueTicks span');
   function paintSlider(i){
-    if(range) range.style.setProperty('--p',(i/3*100)+'%');
+    if(range) range.style.setProperty('--p',(i/4*100)+'%');
     if(valueLabel) valueLabel.textContent = VALUES[i];
+    var note = document.getElementById('valueNote');
+    if(note) note.classList.toggle('is-on', i===POPULAR);
     valueTicks.forEach(function(t,ti){ t.classList.toggle('is-on', ti===i); });
   }
   if(range){
@@ -668,10 +986,136 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   (function initSlider(){
     if(!range) return;
     var vi = VALUES.indexOf(state.answers.value);
-    if(vi < 0){ vi = 1; state.answers.value = VALUES[1]; persist(); }
+    if(vi < 0){ vi = POPULAR; state.answers.value = VALUES[POPULAR]; persist(); }
     range.value = vi; paintSlider(vi);
   })();
   showStep(typeof state.step==='number'?state.step:1, {noScroll:true});
+})();
+</script>
+
+<!-- VIDEO-MESSAGE PLAYER -->
+<div class="vp" id="vmsgPlayer" hidden>
+  <div class="vp__backdrop" data-vp-close></div>
+  <div class="vp__player">
+    <video class="vp__video" id="vmsgVideo" playsinline preload="auto"></video>
+    <button class="vp__close" type="button" aria-label="Sluiten" data-vp-close>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <button class="vp__bigplay" type="button" aria-label="Afspelen" id="vmsgBig" hidden>
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <div class="vp__bar">
+      <button class="vp__ctrl" type="button" id="vmsgPlay" aria-label="Afspelen / pauzeren">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+      </button>
+      <div class="vp__progress"><span id="vmsgProg"></span></div>
+      <button class="vp__ctrl" type="button" id="vmsgMute" aria-label="Geluid aan / uit">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" stroke="none"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8 8 0 0 1 0 12"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.11"></script>
+<script>
+(function(){
+  'use strict';
+  var SRC = 'https://vz-45716865-4aa.b-cdn.net/986d0aa1-6b63-4758-a5f9-2d4d97060421/playlist.m3u8';      // played (with sound) when the circle is clicked
+  var PREVIEW_SRC = 'https://vz-45716865-4aa.b-cdn.net/aaf9362d-70c8-46ad-a25a-2b7c714b2d12/playlist.m3u8'; // silent loop shown inside the circle
+
+  // Attach an HLS stream to a <video> — native HLS on Safari, hls.js elsewhere; always highest rendition.
+  function attachHls(video, src){
+    if(!video || !src) return null;
+    if(window.Hls && window.Hls.isSupported()){
+      var hls = new window.Hls({ maxBufferLength:12, capLevelToPlayerSize:false, startLevel:-1 });
+      hls.attachMedia(video);
+      hls.on(window.Hls.Events.MEDIA_ATTACHED, function(){ hls.loadSource(src); });
+      hls.on(window.Hls.Events.MANIFEST_PARSED, function(){ if(hls.levels && hls.levels.length) hls.currentLevel = hls.levels.length-1; });
+      return hls;
+    }
+    video.src = src; return null;
+  }
+
+  // Looping muted preview inside the circle.
+  var preview = document.getElementById('vmsgPreview');
+  if(preview){ attachHls(preview, PREVIEW_SRC); var pp = preview.play(); if(pp && pp.catch) pp.catch(function(){}); }
+
+  // Fullscreen player.
+  var trigger = document.getElementById('vmsgOpen');
+  var vp = document.getElementById('vmsgPlayer');
+  if(!trigger || !vp) return;
+  var box = vp.querySelector('.vp__player');
+  var video = document.getElementById('vmsgVideo');
+  var prog = document.getElementById('vmsgProg');
+  var bigBtn = document.getElementById('vmsgBig');
+  var playBtn = document.getElementById('vmsgPlay');
+  var muteBtn = document.getElementById('vmsgMute');
+  var hls = null;
+
+  function sizePlayer(){
+    var aspect = (video.videoWidth && video.videoHeight) ? video.videoWidth/video.videoHeight : 9/16;
+    var maxH = window.innerHeight*0.86, maxW = window.innerWidth*0.92;
+    var h = maxH, w = h*aspect;
+    if(w > maxW){ w = maxW; h = w/aspect; }
+    box.style.width = w+'px'; box.style.height = h+'px'; box.style.aspectRatio = 'auto';
+  }
+  function setPaused(p){
+    if(bigBtn) bigBtn.hidden = !p;
+    if(playBtn) playBtn.firstElementChild.innerHTML = p
+      ? '<path d="M8 5v14l11-7z"/>'
+      : '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>';
+  }
+  function togglePlay(){ if(video.paused){ video.play(); } else { video.pause(); } }
+
+  function open(){
+    vp.hidden = false; document.body.style.overflow = 'hidden';
+    if(!hls) hls = attachHls(video, SRC);
+    void vp.offsetWidth; /* force reflow so the open transition plays (rAF is throttled in hidden iframes) */
+    vp.classList.add('is-open');
+    video.muted = false; if(muteBtn) muteBtn.style.opacity = '1';
+    try{ video.currentTime = 0; }catch(e){}
+    var p = video.play(); if(p && p.catch) p.catch(function(){});
+  }
+  function close(){
+    vp.classList.remove('is-open');
+    try{ video.pause(); }catch(e){}
+    video.muted = true;
+    setTimeout(function(){
+      vp.hidden = true; document.body.style.overflow = '';
+      if(hls){ try{ hls.destroy(); }catch(e){} hls = null; }
+    }, 420);
+  }
+
+  trigger.addEventListener('click', open);
+  vp.querySelectorAll('[data-vp-close]').forEach(function(el){ el.addEventListener('click', close); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !vp.hidden) close(); });
+  video.addEventListener('click', togglePlay);
+  if(playBtn) playBtn.addEventListener('click', togglePlay);
+  if(bigBtn) bigBtn.addEventListener('click', togglePlay);
+  if(muteBtn) muteBtn.addEventListener('click', function(){ video.muted = !video.muted; muteBtn.style.opacity = video.muted ? '.5' : '1'; });
+  video.addEventListener('play', function(){ setPaused(false); });
+  video.addEventListener('pause', function(){ setPaused(true); });
+  video.addEventListener('loadedmetadata', sizePlayer);
+  video.addEventListener('timeupdate', function(){ if(video.duration && prog) prog.style.width = (video.currentTime/video.duration*100)+'%'; });
+  window.addEventListener('resize', function(){ if(!vp.hidden) sizePlayer(); });
+})();
+</script>
+
+<script>
+(function(){
+  var el = document.getElementById('scanNoteRot');
+  if(!el) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var items = ['Boost-sessie van 30 minuten','Volledig vrijblijvend','Reactie binnen 1 werkdag'];
+  var i = 0;
+  setInterval(function(){
+    el.classList.add('is-out');
+    setTimeout(function(){
+      i = (i + 1) % items.length;
+      el.textContent = items[i];
+      el.classList.remove('is-out');
+    }, 420);
+  }, 4200);
 })();
 </script>
 
