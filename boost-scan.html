@@ -343,6 +343,19 @@ img,svg{display:block;max-width:100%;}
 .scan-step.is-active .scan-gauge__seg{ animation:barIn .5s var(--ease-out) both; animation-delay:calc(.05s + var(--i,0)*.012s); }
 .scan-gauge__copy{ margin-top:17px; font-size:13.5px; line-height:1.5; color:var(--text-dim); max-width:560px; text-wrap:pretty; }
 .scan-gauge__copy b{ color:var(--cream); font-weight:600; }
+.scan-gauge__compact{ display:none; }
+@media (max-width:760px){
+  .scan-gauge__bars-full{ display:none; }
+  .scan-gauge__compact{ display:flex; gap:12px; margin-top:6px; }
+  .scan-gauge__stat{ flex:1; min-width:0; display:flex; flex-direction:column; gap:10px; padding:14px 15px 15px; border:1px solid var(--line); border-radius:14px; background:var(--card); }
+  .scan-gauge__stat-label{ font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dim); }
+  .scan-gauge__stat-num{ font-family:var(--ultra); font-size:clamp(26px,7.5vw,34px); font-weight:900; line-height:1; letter-spacing:-.015em; }
+  .scan-gauge__stat-num--red{ color:#FF5353; }
+  .scan-gauge__stat-num--green{ color:#5BE26B; }
+  .scan-gauge__mini{ height:6px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:1px; }
+  .scan-gauge__mini i{ display:block; height:100%; width:0; border-radius:999px; transition:width .7s var(--ease-out); }
+  .scan-gauge__copy{ display:none; }
+}
 .scan-acc__sub{ display:block; font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:11px; }
 .scan-acc__sub--mt{ margin-top:20px; }
 .scan-acc__note{ margin-top:15px; font-size:13px; line-height:1.5; color:var(--text-dim); }
@@ -573,16 +586,31 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="scan-score__emoji" id="diagEmoji">😬</span>
           </div>
           <p class="scan-score__pain" id="diagPain">Vooral je merk-uitstraling en zichtbaarheid houden je groei nu tegen.</p>
+          <p class="scan-final__line">Dennis denkt graag in een korte sessie van 30 minuten met jullie mee hoe je dit slim in fasen aanpakt, passend binnen het beschikbare budget.</p>
           <div class="scan-gauge">
-            <div class="scan-gauge__row">
-              <span class="scan-gauge__label">Huidige merkpositie</span>
-              <div class="scan-gauge__bar" id="gaugeNow"></div>
+            <div class="scan-gauge__bars-full">
+              <div class="scan-gauge__row">
+                <span class="scan-gauge__label">Huidige merkpositie</span>
+                <div class="scan-gauge__bar" id="gaugeNow"></div>
+              </div>
+              <div class="scan-gauge__row">
+                <span class="scan-gauge__label scan-gauge__label--pot">Groeipotentie <span class="scan-gauge__gap" id="gaugeGap">+34%</span></span>
+                <div class="scan-gauge__bar" id="gaugePot"></div>
+              </div>
             </div>
-            <div class="scan-gauge__row">
-              <span class="scan-gauge__label scan-gauge__label--pot">Groeipotentie <span class="scan-gauge__gap" id="gaugeGap">+34%</span></span>
-              <div class="scan-gauge__bar" id="gaugePot"></div>
+            <div class="scan-gauge__compact" aria-hidden="true">
+              <div class="scan-gauge__stat">
+                <span class="scan-gauge__stat-label">Huidige positie</span>
+                <span class="scan-gauge__stat-num scan-gauge__stat-num--red" id="gaugeNowPct">46%</span>
+                <span class="scan-gauge__mini"><i id="gaugeNowMini" style="background:#FF5353"></i></span>
+              </div>
+              <div class="scan-gauge__stat">
+                <span class="scan-gauge__stat-label">Groeipotentie</span>
+                <span class="scan-gauge__stat-num scan-gauge__stat-num--green" id="gaugePotPct">+87%</span>
+                <span class="scan-gauge__mini"><i id="gaugePotMini" style="background:#5BE26B"></i></span>
+              </div>
             </div>
-            <p class="scan-gauge__copy">De ruimte tussen beide meters is de groei die <b>nu nog blijft liggen.</b></p>
+            <p class="scan-gauge__copy">Dat verschil is de groei die <b>nu nog blijft liggen.</b></p>
           </div>
         </div>
 
@@ -598,8 +626,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p class="scan-acc__note">In de sessie kijken we samen welke van deze kansen <b>écht impact maken</b> voor jullie merk.</p>
           </div>
         </details>
-
-        <p class="scan-final__line">Dennis denkt graag in een korte sessie van 30 minuten met jullie mee hoe je dit slim in fasen aanpakt, passend binnen het beschikbare budget.</p>
 
         <button type="button" class="scan-vmsg2" id="vmsgOpen" aria-label="Bekijk de videoboodschap van Dennis">
           <span class="scan-vmsg2__circle">
@@ -818,7 +844,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(nowEl) nowEl.innerHTML = gaugeBar(function(i){ return i < nowFill ? nowColor : ''; });
     var potEl = document.getElementById('gaugePot');
     if(potEl) potEl.innerHTML = gaugeBar(function(i){ return i < potFill ? (i < nowFill ? potSolid : potGhost) : ''; });
-    var gapEl = document.getElementById('gaugeGap'); if(gapEl) gapEl.textContent = '+' + Math.round((potential - score) / score * 100) + '%';
+    var gapEl = document.getElementById('gaugeGap');
+    var relGrowth = Math.round((potential - score) / score * 100);
+    if(gapEl) gapEl.textContent = '+' + relGrowth + '%';
+    var nowPctEl = document.getElementById('gaugeNowPct'); if(nowPctEl) nowPctEl.textContent = score + '%';
+    var potPctEl = document.getElementById('gaugePotPct'); if(potPctEl) potPctEl.textContent = '+' + relGrowth + '%';
+    var nowMini = document.getElementById('gaugeNowMini'); if(nowMini) nowMini.style.width = score + '%';
+    var potMini = document.getElementById('gaugePotMini'); if(potMini) potMini.style.width = potential + '%';
 
     var insEl = document.getElementById('diagInsight');
     if(insEl){
