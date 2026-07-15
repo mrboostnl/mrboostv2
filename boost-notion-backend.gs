@@ -75,6 +75,7 @@ function createLead(l) {
   };
   if (l.email) props['E-mail']    = { email: l.email };
   if (l.phone) props['Telefoon']  = { phone_number: l.phone };
+  if (l.website) props['Website'] = { url: /^https?:\/\//i.test(l.website) ? l.website : 'https://' + l.website };
   if (l.value) props['Waarde']    = { select: { name: l.value } };
   if (l.recognise && l.recognise.length) props['Herkenning'] = { multi_select: toOptions(l.recognise) };
   if (l.ambition  && l.ambition.length)  props['Ambitie']    = { multi_select: toOptions(l.ambition) };
@@ -110,6 +111,7 @@ function pageToLead(pg) {
     company:   rich(p['Bedrijf']),
     email:     (p['E-mail'] && p['E-mail'].email) || '',
     phone:     (p['Telefoon'] && p['Telefoon'].phone_number) || '',
+    website:   ((p['Website'] && p['Website'].url) || '').replace(/^https?:\/\//i, ''),
     recognise: multi(p['Herkenning']),
     ambition:  multi(p['Ambitie']),
     risk:      multi(p['Risico']),

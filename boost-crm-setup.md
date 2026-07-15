@@ -21,6 +21,7 @@ type moeten kloppen, anders weigert Notion de lead):
 | `Bedrijf`   | Text             |
 | `E-mail`    | Email            |
 | `Telefoon`  | Phone            |
+| `Website`   | URL              |
 | `Herkenning`| Multi-select     |
 | `Ambitie`   | Multi-select     |
 | `Risico`    | Multi-select     |

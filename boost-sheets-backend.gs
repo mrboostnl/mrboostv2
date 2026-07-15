@@ -19,13 +19,13 @@ function doPost(e) {
     sh.appendRow([
       l.id, new Date(l.ts || Date.now()), l.name, l.company, l.email, l.phone,
       (l.recognise || []).join(' | '), (l.ambition || []).join(' | '),
-      (l.risk || []).join(' | '), l.value, l.status || 'new'
+      (l.risk || []).join(' | '), l.value, l.status || 'new', l.website || ''
     ]);
     if (NOTIFY) {
       MailApp.sendEmail(NOTIFY,
         'Nieuwe Boost lead: ' + (l.name || '') + ' (' + (l.company || '') + ')',
         'Naam: ' + l.name + '\nBedrijf: ' + l.company + '\nE-mail: ' + l.email +
-        '\nTelefoon: ' + l.phone + '\nWaarde: ' + l.value +
+        '\nTelefoon: ' + l.phone + '\nWebsite: ' + (l.website || '-') + '\nWaarde: ' + l.value +
         '\n\nHerkenning: ' + (l.recognise || []).join(', ') +
         '\nAmbitie: ' + (l.ambition || []).join(', ') +
         '\nRisico: ' + (l.risk || []).join(', '));
@@ -47,7 +47,8 @@ function doGet(e) {
     return {
       id: r[0], ts: new Date(r[1]).getTime(), name: r[2], company: r[3],
       email: r[4], phone: String(r[5] == null ? '' : r[5]), recognise: split(r[6]), ambition: split(r[7]),
-      risk: split(r[8]), value: r[9], status: r[10] || 'new'
+      risk: split(r[8]), value: r[9], status: r[10] || 'new',
+      website: String(r[11] == null ? '' : r[11])
     };
   });
   leads.sort(function (a, b) { return b.ts - a.ts; });
@@ -69,7 +70,7 @@ function getSheet() {
   if (!sh) {
     sh = ss.insertSheet(SHEET);
     sh.appendRow(['id', 'datum', 'naam', 'bedrijf', 'email', 'telefoon',
-      'herkenning', 'ambitie', 'risico', 'waarde', 'status']);
+      'herkenning', 'ambitie', 'risico', 'waarde', 'status', 'website']);
   }
   // telefoonkolom (F) als tekst, zodat de voorloop-nul niet wegvalt
   sh.getRange('F2:F').setNumberFormat('@');

@@ -642,7 +642,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="scan-field"><input type="text" name="company" placeholder="Bedrijfsnaam" required /><span class="scan-field__req" aria-hidden="true">*</span></div>
             <div class="scan-field"><input type="email" name="email" placeholder="E-mailadres" required /><span class="scan-field__req" aria-hidden="true">*</span></div>
             <div class="scan-field"><input type="tel" name="phone" placeholder="Telefoonnummer" required /><span class="scan-field__req" aria-hidden="true">*</span></div>
-            <p class="scan-reqnote"><span>*</span> Alle velden zijn verplicht</p>
+            <div class="scan-field scan-field--full"><input type="text" name="website" placeholder="Domeinnaam van je website (optioneel)" autocomplete="url" /></div>
+            <p class="scan-reqnote"><span>*</span> Velden met een sterretje zijn verplicht</p>
             <button type="submit" class="scan-next scan-submit">Plan mijn sessie
               <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
@@ -722,7 +723,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var segs = [].slice.call(document.querySelectorAll('#segs .scan-seg'));
   var body = document.body;
 
-  var state = { step:1, answers:{ recognise:[], ambition:[], risk:[], value:'', name:'', company:'', email:'', phone:'' } };
+  var state = { step:1, answers:{ recognise:[], ambition:[], risk:[], value:'', name:'', company:'', email:'', phone:'', website:'' } };
   try { var s = JSON.parse(localStorage.getItem(STORE)||'null'); if(s&&s.answers) state = s; } catch(e){}
 
   /* preserve preview query string */
@@ -935,7 +936,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     });
     /* value slider position is restored at init */
     var f = document.getElementById('scanForm');
-    if(f){ ['name','company','email','phone'].forEach(function(k){ if(state.answers[k]) f[k].value = state.answers[k]; }); }
+    if(f){ ['name','company','email','phone','website'].forEach(function(k){ if(state.answers[k]) f[k].value = state.answers[k]; }); }
   }
   function label(opt){ var l = opt.querySelector('.scan-opt__label'); return (l?l.textContent:opt.textContent).trim(); }
 
@@ -1029,6 +1030,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(!form.reportValidity()) return;
     state.answers.name = form.name.value; state.answers.company = form.company.value;
     state.answers.email = form.email.value; state.answers.phone = form.phone.value;
+    state.answers.website = form.website.value;
     persist();
     /* ---- store lead for the CRM (/bh33r) ---- */
     try {
@@ -1039,6 +1041,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         company: state.answers.company || '',
         email: state.answers.email || '',
         phone: state.answers.phone || '',
+        website: (state.answers.website || '').trim(),
         recognise: (state.answers.recognise || []).slice(),
         ambition: (state.answers.ambition || []).slice(),
         risk: (state.answers.risk || []).slice(),
@@ -1060,7 +1063,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(sn && state.answers.name) sn.textContent = state.answers.name;
     showStep('success');
   });
-  ['name','company','email','phone'].forEach(function(k){
+  ['name','company','email','phone','website'].forEach(function(k){
     if(form[k]) form[k].addEventListener('input', function(){ state.answers[k]=form[k].value; persist(); });
   });
 

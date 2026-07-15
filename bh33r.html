@@ -204,6 +204,7 @@ img,svg{display:block;max-width:100%;}
 .contact-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:26px; }
 .contact{ display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:12px; border:1px solid var(--line); background:var(--bg-2); transition:border-color .2s; }
 .contact:hover{ border-color:var(--line-2); }
+.contact--full{ grid-column:1 / -1; }
 .contact__ic{ flex:none; width:34px;height:34px; border-radius:9px; display:grid; place-items:center; background:rgba(255,255,255,.05); color:var(--cream); }
 .contact__ic svg{ width:16px;height:16px; }
 .contact__t{ min-width:0; }
@@ -213,6 +214,11 @@ img,svg{display:block;max-width:100%;}
 .wa-btn{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; margin:-8px 0 26px; padding:14px 18px; border-radius:12px; background:#25D366; color:#072b16; font-size:14px; font-weight:700; letter-spacing:.01em; transition:transform .18s var(--ease-out), background .2s; }
 .wa-btn:hover{ background:#2ee06f; transform:translateY(-1px); }
 .wa-btn svg{ width:19px; height:19px; }
+
+.wa-copy{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; margin:-16px 0 26px; padding:13px 18px; border-radius:12px; background:transparent; border:1px solid var(--line-2); color:var(--cream); font-size:14px; font-weight:700; font-family:inherit; cursor:pointer; transition:border-color .15s, background .15s, transform .15s; }
+.wa-copy:hover{ border-color:#25D366; background:rgba(37,211,102,.08); transform:translateY(-1px); }
+.wa-copy svg{ width:17px; height:17px; }
+.wa-copy.is-copied{ border-color:#25D366; color:#25D366; }
 
 .status-group__label{ font-size:11px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--text-dim); margin-bottom:12px; }
 .status-pills{ display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
@@ -332,6 +338,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span>Exporteer CSV</span>
     </button>
+    <button class="topbar__btn topbar__btn--ghost" id="rejectedBtn" title="Afgewezen">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <span>Afgewezen</span><span class="topbar__badge" id="rejectedBadge"></span>
+    </button>
     <button class="topbar__btn topbar__btn--ghost" id="trashBtn" title="Prullenbak">
       <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span>Prullenbak</span><span class="topbar__badge" id="trashBadge"></span>
@@ -362,6 +372,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </div>
 
+<!-- ============ AFGEWEZEN ============ -->
+<div class="trash-ov" id="rejectedOv" aria-hidden="true">
+  <div class="trash-card">
+    <div class="trash-head">
+      <div class="trash-title">Afgewezen</div>
+      <div class="topbar__spacer"></div>
+      <button class="trash-x" id="rejectedClose" title="Sluiten"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="trash-list" id="rejectedList"></div>
+  </div>
+</div>
+
 <!-- ====== BOOST CRM CONFIG — zelfde URL als in boost-scan.html (zie boost-crm-setup.md). Leeg = lokale modus. ====== -->
 <script>window.BOOST_CONFIG = { endpoint: "https://script.google.com/macros/s/AKfycbzhRBu3rCILPM_5ArO9Wirs_cHqt8hCKX1xUJ2nJQscyXQxYKVvIPNFtcQCvf_qXMzp/exec" };</script>
 
@@ -371,6 +393,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   var CODE = '84028402';
   var LEADS_KEY = 'boostLeads';
   var TRASH_KEY = 'boostTrash';
+  var REJECTED_KEY = 'boostRejected';
   var AI_KEY = 'boostAI';
   var AUTH_KEY = 'boostCrmAuth';
 
@@ -406,6 +429,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function save(leads){ try { localStorage.setItem(LEADS_KEY, JSON.stringify(leads)); } catch(e){} }
   function loadTrash(){ try { return JSON.parse(localStorage.getItem(TRASH_KEY) || '[]'); } catch(e){ return []; } }
   function saveTrash(t){ try { localStorage.setItem(TRASH_KEY, JSON.stringify(t)); } catch(e){} }
+  function loadRejected(){ try { return JSON.parse(localStorage.getItem(REJECTED_KEY) || '[]'); } catch(e){ return []; } }
+  function saveRejected(t){ try { localStorage.setItem(REJECTED_KEY, JSON.stringify(t)); } catch(e){} }
   function byTs(a,b){ return b.ts - a.ts; }
 
   /* ---------- remote (optional CRM backend) ---------- */
@@ -464,7 +489,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     { key:'msg',     label:'1e bericht verstuurd', short:'1e bericht', color:'#7cc6ff' },
     { key:'meeting', label:'Meeting met Dennis',   short:'Meeting',    color:'#b9a3ff' },
     { key:'offerte', label:'Offerte gestuurd',     short:'Offerte',    color:'#ffc879' },
-    { key:'closed',  label:'Geclosed',             short:'Geclosed',   color:'#74e0a0' }
+    { key:'closed',  label:'Geclosed',             short:'Geclosed',   color:'#74e0a0' },
+    { key:'rejected',label:'Afgewezen',            short:'Afgewezen',  color:'#ff7a6b' }
   ];
   var STATUS_MAP = {}; STATUSES.forEach(function(s){ STATUS_MAP[s.key] = s; });
   // legacy values from older versions
@@ -513,7 +539,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var fn = firstNameOf(l);
     return 'Je bent een Nederlandse sales-assistent voor Mr Boost, een creatief branding- en marketingbureau. '+
       'Hieronder de gegevens van een lead die de online "Boost Scan" heeft ingevuld.\n\n'+
-      'Naam: '+(l.name||'-')+'\nVoornaam: '+(fn||'-')+'\nBedrijf: '+(l.company||'-')+'\n'+
+      'Naam: '+(l.name||'-')+'\nVoornaam: '+(fn||'-')+'\nBedrijf: '+(l.company||'-')+'\nWebsite: '+(l.website||'-')+'\n'+
       'Herkent zich in: '+((l.recognise||[]).join(', ')||'-')+'\n'+
       'Wil bereiken: '+((l.ambition||[]).join(', ')||'-')+'\n'+
       'Risico bij niets doen: '+((l.risk||[]).join(', ')||'-')+'\n'+
@@ -634,6 +660,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var leads = load();
     renderStats(leads);
     updateTrashBadge();
+    updateRejectedBadge();
     var host = document.getElementById('boardHost');
     if(!leads.length){ host.innerHTML = emptyHTML(); wireEmpty(); return; }
 
@@ -641,7 +668,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var filtered = leads.filter(function(l){
       if(!passDate(l)) return false;
       if(!searchTerm) return true;
-      var hay = (l.name+' '+l.company+' '+l.email).toLowerCase();
+      var hay = (l.name+' '+l.company+' '+l.email+' '+(l.website||'')).toLowerCase();
       return hay.indexOf(searchTerm.toLowerCase()) !== -1;
     });
 
@@ -720,6 +747,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         '<div class="contact-row">' +
           contact('mail','E-mail', l.email, 'mailto:'+encodeURIComponent(l.email||'')) +
           contact('phone','Telefoon', l.phone||'—', l.phone?('tel:'+String(l.phone).replace(/\\s/g,'')):null) +
+          (l.website ? contact('globe','Website', l.website, webUrl(l.website), true) : '') +
         '</div>' +
         waButton(l) +
         '<div class="status-group__label">Status</div>' +
@@ -734,12 +762,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         '</div>' +
       '</div>';
   }
-  function contact(ic, label, val, href){
+  function contact(ic, label, val, href, full){
     var icon = ic==='mail'
       ? '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.7"/></svg>'
+      : ic==='globe'
+      ? '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.7 3.7 9S14.5 18.4 12 21c-2.5-2.6-3.7-5.7-3.7-9S9.5 5.6 12 3z" stroke="currentColor" stroke-width="1.7"/></svg>'
       : '<svg viewBox="0 0 24 24" fill="none"><path d="M5 4h3l2 5-2 1a11 11 0 005 5l1-2 5 2v3a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>';
+    var cls = 'contact' + (full ? ' contact--full' : '');
     var inner = '<div class="contact__ic">'+icon+'</div><div class="contact__t"><div class="contact__l">'+label+'</div><div class="contact__v">'+esc(val||'—')+'</div></div>';
-    return href ? '<a class="contact" href="'+href+'">'+inner+'</a>' : '<div class="contact">'+inner+'</div>';
+    return href ? '<a class="'+cls+'" href="'+href+'" target="_blank" rel="noopener">'+inner+'</a>' : '<div class="'+cls+'">'+inner+'</div>';
+  }
+  function webUrl(w){
+    var v = String(w||'').trim();
+    if(!v) return null;
+    return /^https?:\/\//i.test(v) ? v : 'https://' + v;
   }
   // normalise a (Dutch) phone number to a wa.me-friendly international form
   function waNumber(phone){
@@ -755,7 +791,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     var n = waNumber(l.phone);
     if(!n) return '';
     var wa = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.9c0 1.76.46 3.45 1.33 4.95L2 22l5.27-1.38a9.9 9.9 0 004.77 1.22h.01c5.46 0 9.9-4.45 9.9-9.9 0-2.65-1.03-5.13-2.9-7A9.82 9.82 0 0012.04 2zm0 18.14h-.01a8.2 8.2 0 01-4.18-1.15l-.3-.18-3.1.81.83-3.02-.2-.31a8.2 8.2 0 01-1.26-4.39c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 012.41 5.82c0 4.54-3.69 8.23-8.22 8.23zm4.52-6.16c-.25-.13-1.47-.72-1.69-.8-.23-.09-.39-.13-.56.12-.16.25-.64.8-.79.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.39.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.86.84-.86 2.05 0 1.21.88 2.38 1 2.55.12.16 1.73 2.64 4.19 3.7.58.25 1.04.4 1.4.51.59.19 1.12.16 1.54.1.47-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>';
-    return '<a class="wa-btn" href="https://wa.me/'+n+'" target="_blank" rel="noopener">'+wa+'Open in WhatsApp</a>';
+    return '<a class="wa-btn" href="https://wa.me/'+n+'" target="_blank" rel="noopener">'+wa+'Open in WhatsApp</a>' + waCopyButton();
+  }
+  function waMessage(l){
+    var fn = firstNameOf(l) || 'daar';
+    return 'Hi ' + fn + ', \uD83D\uDC4B\n\n' +
+      'Leuk dat je interesse hebt in Mr Boost! Ik ben Iris en voordat ik een call met je inplan met Dennis zou ik je graag nog even kort willen bellen, zodat ik een goed beeld heb van je wensen en hoe we daar eventueel bij kunnen helpen.\n\n' +
+      'Komt woensdagochtend tussen 08:30 en 10:00 uur je uit, of past donderdagochtend (zelfde tijd) beter? Laat het me even weten, dan plan ik het gelijk in! \uD83D\uDE80';
+  }
+  function waCopyButton(){
+    return '<button class="wa-copy" id="waCopyBtn" type="button">' +
+      '<svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M5 15V6a2 2 0 012-2h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>' +
+      '<span>Kopieer bericht</span></button>';
   }
 
   function emptyHTML(){
@@ -787,6 +834,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       if(mi.value){ dateFilter='ym'; monthFilter=mi.value; } else { dateFilter='all'; monthFilter=''; }
       render();
     });
+    // copy the ready-made WhatsApp opener to the clipboard
+    var waCopy = document.getElementById('waCopyBtn');
+    if(waCopy) waCopy.addEventListener('click', function(){
+      var lead = load().filter(function(l){ return l.id===selectedId; })[0];
+      if(!lead) return;
+      var msg = waMessage(lead);
+      function ok(){
+        waCopy.classList.add('is-copied');
+        waCopy.querySelector('span').textContent = 'Gekopieerd!';
+        toast('Bericht gekopieerd — plakken in WhatsApp');
+        setTimeout(function(){ waCopy.classList.remove('is-copied'); var s=waCopy.querySelector('span'); if(s) s.textContent='Kopieer bericht'; }, 2200);
+      }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(msg).then(ok, function(){ fallbackCopy(msg); ok(); });
+      } else { fallbackCopy(msg); ok(); }
+    });
+    function fallbackCopy(t){
+      var ta = document.createElement('textarea');
+      ta.value = t; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); }catch(e){}
+      document.body.removeChild(ta);
+    }
     // delete — tucked away, two-step confirm so nothing is binned by accident
     var del = document.getElementById('delBtn');
     if(del) del.addEventListener('click', function(){
@@ -800,6 +870,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     document.querySelectorAll('#statusPills .status-pill').forEach(function(p){
       p.addEventListener('click', function(){
         var s = p.getAttribute('data-status');
+        if(s==='rejected'){ rejectLead(selectedId); return; }
         postAction({ type:'status', id:selectedId, status:s });
         var leads = load(); leads.forEach(function(l){ if(l.id===selectedId) l.status=s; }); save(leads); render(); toast('Status: '+statusLabel(s));
       });
@@ -827,7 +898,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     if(sb) sb.addEventListener('click', function(){
       var leads = load();
       leads.unshift({ id:'L'+Date.now().toString(36).toUpperCase(), ts:Date.now()-3600000,
-        name:'Sanne de Vries', company:'Atelier Noord', email:'sanne@ateliernoord.nl', phone:'+31 6 24 81 33 90',
+        name:'Sanne de Vries', company:'Atelier Noord', email:'sanne@ateliernoord.nl', phone:'+31 6 24 81 33 90', website:'ateliernoord.nl',
         recognise:['Zwakke branding','Te weinig aandacht','Meer potentieel dan resultaat'],
         ambition:['Sterker merk','Premium klanten','Meer omzet'],
         risk:['Concurrenten groeien harder','Onzichtbaar blijven'],
@@ -845,9 +916,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   document.getElementById('exportBtn').addEventListener('click', function(){
     var leads = load();
     if(!leads.length){ toast('Geen leads om te exporteren'); return; }
-    var cols = ['Datum','Naam','Bedrijf','E-mail','Telefoon','Status','Herkenning','Ambitie','Risico','Waarde'];
+    var cols = ['Datum','Naam','Bedrijf','E-mail','Telefoon','Website','Status','Herkenning','Ambitie','Risico','Waarde'];
     var rows = leads.map(function(l){
-      return [ new Date(l.ts).toLocaleString('nl-NL'), l.name, l.company, l.email, l.phone, statusLabel(l.status),
+      return [ new Date(l.ts).toLocaleString('nl-NL'), l.name, l.company, l.email, l.phone, (l.website||''), statusLabel(l.status),
         (l.recognise||[]).join(' | '), (l.ambition||[]).join(' | '), (l.risk||[]).join(' | '), l.value ].map(csvCell).join(',');
     });
     var csv = cols.join(',') + '\\n' + rows.join('\\n');
@@ -919,11 +990,78 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   trashOv.addEventListener('click', function(e){ if(e.target===trashOv) closeTrash(); });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape' && trashOv.classList.contains('show')) closeTrash(); });
 
+  /* ---------- afgewezen (reject + restore) ---------- */
+  function rejectLead(id){
+    if(!id) return;
+    var leads = load();
+    var lead = leads.filter(function(l){ return l.id===id; })[0];
+    var rest = leads.filter(function(l){ return l.id!==id; });
+    if(lead){
+      lead.status = 'rejected'; lead._rejectedTs = Date.now();
+      var rej = loadRejected(); rej.unshift(lead); saveRejected(rej);
+      postAction({ type:'status', id:id, status:'rejected' });
+    }
+    save(rest);
+    selectedId = null; render(); toast('Lead afgewezen');
+  }
+  function restoreRejected(id){
+    var rej = loadRejected();
+    var lead = rej.filter(function(l){ return l.id===id; })[0];
+    var rest = rej.filter(function(l){ return l.id!==id; });
+    if(lead){
+      delete lead._rejectedTs; lead.status = 'new';
+      var leads = load(); leads.unshift(lead); leads.sort(byTs); save(leads);
+      postAction({ type:'status', id:id, status:'new' });
+    }
+    saveRejected(rest); selectedId = id; render(); renderRejected(); toast('Lead teruggezet');
+  }
+  function purgeRejected(id){
+    var rej = loadRejected();
+    var lead = rej.filter(function(l){ return l.id===id; })[0];
+    if(lead){ lead._deletedTs = Date.now(); var trash = loadTrash(); trash.unshift(lead); saveTrash(trash); }
+    saveRejected(rej.filter(function(l){ return l.id!==id; }));
+    renderRejected(); updateRejectedBadge(); updateTrashBadge(); toast('Lead naar prullenbak');
+  }
+  function updateRejectedBadge(){
+    var b = document.getElementById('rejectedBadge'); if(!b) return;
+    var n = loadRejected().length; b.textContent = n ? n : '';
+  }
+  function renderRejected(){
+    var list = document.getElementById('rejectedList'); if(!list) return;
+    var rej = loadRejected();
+    if(!rej.length){
+      list.innerHTML = '<div class="trash-empty"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Nog geen afgewezen leads. Zet de status van een lead op “Afgewezen” en hij verschijnt hier.</div>';
+      return;
+    }
+    list.innerHTML = rej.map(function(l){
+      var when = l._rejectedTs ? ('Afgewezen · '+timeAgo(l._rejectedTs)) : 'Afgewezen';
+      return '<div class="trash-row">' +
+        '<div class="trash-row__av">'+initials(l.name,l.company)+'</div>' +
+        '<div class="trash-row__main">' +
+          '<div class="trash-row__name">'+esc(l.name||'Onbekend')+(l.company?' · '+esc(l.company):'')+'</div>' +
+          '<div class="trash-row__meta">'+when+(l.value?' · '+esc(l.value):'')+'</div>' +
+        '</div>' +
+        '<button class="trash-restore" data-rrestore="'+l.id+'"><svg viewBox="0 0 24 24" fill="none"><path d="M4 4v6h6M20 20v-6h-6M20 9A8 8 0 006 5.3L4 7m0 10a8 8 0 0014 1.7l2-1.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Terugzetten</button>' +
+        '<button class="trash-purge" data-rpurge="'+l.id+'" title="Naar prullenbak"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+      '</div>';
+    }).join('');
+    list.querySelectorAll('[data-rrestore]').forEach(function(b){ b.addEventListener('click', function(){ restoreRejected(b.getAttribute('data-rrestore')); }); });
+    list.querySelectorAll('[data-rpurge]').forEach(function(b){ b.addEventListener('click', function(){ purgeRejected(b.getAttribute('data-rpurge')); }); });
+  }
+  var rejectedOv = document.getElementById('rejectedOv');
+  function openRejected(){ renderRejected(); rejectedOv.classList.add('show'); rejectedOv.setAttribute('aria-hidden','false'); }
+  function closeRejected(){ rejectedOv.classList.remove('show'); rejectedOv.setAttribute('aria-hidden','true'); }
+  document.getElementById('rejectedBtn').addEventListener('click', openRejected);
+  document.getElementById('rejectedClose').addEventListener('click', closeRejected);
+  rejectedOv.addEventListener('click', function(e){ if(e.target===rejectedOv) closeRejected(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && rejectedOv.classList.contains('show')) closeRejected(); });
+
   /* ---------- boot ---------- */
   if(isAuthed()) openApp(); else { input.focus(); }
   updateTrashBadge();
+  updateRejectedBadge();
   // live refresh if a lead comes in from another tab
-  window.addEventListener('storage', function(e){ if((e.key===LEADS_KEY||e.key===TRASH_KEY) && appEl.classList.contains('show')){ render(); if(trashOv.classList.contains('show')) renderTrash(); } });
+  window.addEventListener('storage', function(e){ if((e.key===LEADS_KEY||e.key===TRASH_KEY||e.key===REJECTED_KEY) && appEl.classList.contains('show')){ render(); if(trashOv.classList.contains('show')) renderTrash(); if(rejectedOv.classList.contains('show')) renderRejected(); } });
 })();
 </script>
 
