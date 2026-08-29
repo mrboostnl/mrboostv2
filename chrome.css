@@ -593,6 +593,7 @@ body.is-footer-visible .sp-fab {
 .chrome-footer-wrap {
   position: relative;
   overflow: hidden;
+  background: var(--cream, #e9e8e3);
 }
 .chrome-footer-wrap__dark {
   opacity: 0;
